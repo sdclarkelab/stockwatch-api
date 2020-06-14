@@ -1,0 +1,19 @@
+version: '3.5'
+
+services:
+  db:
+    container_name: stockwatch_api_db
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: stockwatch
+    ports:
+    - "5432:5432"
+    networks:
+    - stockwatch_net
+
+networks:
+  stockwatch_net:
+    driver: bridge
+    name: stockwatch_net

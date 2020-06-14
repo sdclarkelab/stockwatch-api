@@ -1,0 +1,23 @@
+[
+  {
+    "model": "portfolio.StockStatus",
+    "pk": 1,
+    "fields": {
+      "status_name": "Active"
+    }
+  },
+  {
+    "model": "portfolio.StockStatus",
+    "pk": 2,
+    "fields": {
+      "status_name": "Inactive"
+    }
+  },
+  {
+    "model": "portfolio.StockStatus",
+    "pk": 3,
+    "fields": {
+      "status_name": "Incomplete"
+    }
+  }
+]
