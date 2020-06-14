@@ -258,3 +258,4 @@ stockwatch/dev_local_settings.py
 
 # End of https://www.gitignore.io/api/python,django,pycharm
 /venv/
+jmmb_equity_orders.csv

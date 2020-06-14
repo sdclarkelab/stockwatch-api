@@ -26,8 +26,4 @@ def get_stocks_infos():
 
 def get_stock_trade_info(symbol):
     response = req.get(f'{settings.JAMSTOCKEX_API}/stocks/{symbol}?projection=trade_info last_updated_date')
-
-    # trade_info_response = response.json()['trade_info']
-    # trade_info_response['last_updated_date'] = response.json()['last_updated_date']
-
-    return response.json()
+    return response.json()['trade_info']
