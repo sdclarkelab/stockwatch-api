@@ -40,6 +40,7 @@ def get_stock_calculated_detail(investor_id, portfolio_id, symbol):
     }
 
     return {
+        'symbol': symbol,
         'market_position': market_position,
         'performance': stock_performance,
         'transaction_info': transactions_info

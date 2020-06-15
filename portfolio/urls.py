@@ -16,6 +16,11 @@ urlpatterns = [
     path('<int:portfolio_id>/stock/', include('stock.urls')),
 
     #  -------------------------------------
+    #               PERFORMANCE
+    #  -------------------------------------
+    path('<int:portfolio_id>/performance/', include('performance.urls')),
+
+    #  -------------------------------------
     #               IMPORTERS
     #  -------------------------------------
     path('<int:portfolio_id>/import/', include('importer.urls')),

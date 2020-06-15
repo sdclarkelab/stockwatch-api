@@ -14,7 +14,7 @@ from .serializers import StockSerializer
 @protected_resource()
 def stock_detail(request, investor_id, portfolio_id, symbol):
     """
-    Retrieve, update or delete a stock.
+    Retrieve or delete a stock.
     """
     if request.method == 'GET':
         stock_detail_dict = stock_services.get_stock_detail_dict(investor_id, portfolio_id, symbol)
