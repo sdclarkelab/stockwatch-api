@@ -25,5 +25,9 @@ def get_stocks_infos():
 
 
 def get_stock_trade_info(symbol):
-    response = req.get(f'{settings.JAMSTOCKEX_API}/stocks/{symbol}?projection=trade_info last_updated_date')
-    return response.json()['trade_info']
+    try:
+        response = req.get(f'{settings.JAMSTOCKEX_API}/stocks/{symbol}?projection=trade_info last_updated_date')
+        return response.json().get('trade_info', {})
+    except Exception as e:
+        print(symbol)
+        print(e)

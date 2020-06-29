@@ -29,21 +29,31 @@ def get_stock_calculated_detail(investor_id, portfolio_id, symbol):
     transactions_info = trans_services.get_stock_transaction_detail(investor_id, portfolio_id, symbol)
 
     market_position = jamstockex_api_service.get_stock_trade_info(symbol)
-    market_position['market_value'] = stock_cal.calculate_market_value(market_position['market_price'],
-                                                                       transactions_info['total_shares'])
 
-    stock_performance = {
-        'profit / loss value': stock_cal.calculate_profit_value(market_position['market_value'],
-                                                                transactions_info['total_value']),
-        'profit / loss %': stock_cal.calculate_profit_percentage(market_position['market_value'],
-                                                                 transactions_info['total_value'])
-    }
+    if (transactions_info and market_position):
+        market_position['market_value'] = stock_cal.calculate_market_value(market_position['market_price'],
+                                                                           transactions_info['total_shares'])
 
-    return {
-        'market_position': market_position,
-        'performance': stock_performance,
-        'transaction_info': transactions_info
-    }
+        stock_performance = {
+            'profit / loss value': stock_cal.calculate_profit_value(market_position['market_value'],
+                                                                    transactions_info['total_value']),
+            'profit / loss %': stock_cal.calculate_profit_percentage(market_position['market_value'],
+                                                                     transactions_info['total_value'])
+        }
+
+        return {
+            'symbol': symbol,
+            'market_position': market_position,
+            'performance': stock_performance,
+            'transaction_info': transactions_info
+        }
+    else:
+        return {
+            'symbol': symbol,
+            'market_position': {},
+            'performance': {},
+            'transaction_info': {}
+        }
 
 
 def get_stock_detail_dict(investor_id, portfolio_id, symbol):
