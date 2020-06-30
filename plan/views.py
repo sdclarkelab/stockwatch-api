@@ -1,20 +1,25 @@
-from django.shortcuts import get_object_or_404
 from oauth2_provider.decorators import protected_resource
+from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-import plan.calculations as plan_cal
 
 import helper
+import plan.services as plan_services
 import stock.services as stock_services
-from .models import Plan
+from utils.custom_json_resp import CustomJsonResponse
 from .serializers import PlanSerializer
 
 
-@api_view(['POST', 'PUT'])
+@api_view(['POST'])
 @protected_resource()
 def plan(request, investor_id, portfolio_id, symbol):
     """
-    Create or delete a plan details to determine when to sell.
+    Create a stock plan.
+    :param request:
+    :param investor_id:
+    :param portfolio_id:
+    :param symbol:
+    :return:
     """
 
     if request.method == 'POST':
@@ -25,11 +30,17 @@ def plan(request, investor_id, portfolio_id, symbol):
         return helper.save_serializer(serializer)
 
 
-@api_view(['PUT'])
+@api_view(['GET', 'PUT', 'DELETE'])
 @protected_resource()
-def plan_detail(request, investor_id, portfolio_id, symbol):
+def plan_detail(request, investor_id, portfolio_id, symbol, plan_id):
+    plan = plan_services.get_plan(investor_id, portfolio_id, symbol, plan_id)
 
     if request.method == 'PUT':
-        plan = get_object_or_404(Plan, id=investor_id)
-        serializer = PlanSerializer(plan, data=request.data, partial=True)
-        return helper.update_serializer(serializer)
+        return helper.update_serializer(PlanSerializer(plan, data=request.data, partial=True))
+
+    if request.method == 'GET':
+        return Response(PlanSerializer(plan).data)
+
+    if request.method == 'DELETE':
+        plan.delete()
+        return Response(CustomJsonResponse.return_successful_delete(), status=status.HTTP_200_OK)
