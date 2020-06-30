@@ -16,4 +16,6 @@ urlpatterns = [
     # #               NOTIFICATION
     # #  -------------------------------------
     # path('<str:symbol>/notification/', include('notification.urls')),
+
+    path('<str:symbol>/plan/', include('plan.urls')),
 ]
