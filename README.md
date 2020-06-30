@@ -70,7 +70,6 @@ Go to [application registration](http://127.0.0.1:5555/api/v1/stockwatch_admin/o
 
 
 ## Postman API collection
-[![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/a433114bd5484189fc14#?env%5BDev-Docker%5D=W3sia2V5IjoiamFtU3RvY2tVcmwiLCJ2YWx1ZSI6Imh0dHA6Ly8xOTIuMTY4Ljk5LjEwMCIsImVuYWJsZWQiOnRydWV9LHsia2V5IjoiYWNjZXNzX3Rva2VuIiwidmFsdWUiOiJZamFySk9qN0tUWW13YVVISEFMdU0yY1liVmdCcTkiLCJlbmFibGVkIjp0cnVlfSx7ImtleSI6InVzZXJuYW1lIiwidmFsdWUiOiJ0ZXN0MSIsImVuYWJsZWQiOnRydWV9XQ==)
 
 Documented API can be found at
 [link](https://documenter.getpostman.com/view/6678518/S1TU3eAz)
