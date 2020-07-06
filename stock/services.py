@@ -36,9 +36,9 @@ def get_stock_calculated_detail(investor_id, portfolio_id, symbol):
                                                                            transactions_info['total_shares'])
 
         stock_performance = {
-            'profit / loss value': stock_cal.calculate_profit_value(market_position['market_value'],
+            'profit_loss_value': stock_cal.calculate_profit_value(market_position['market_value'],
                                                                     transactions_info['total_value']),
-            'profit / loss %': stock_cal.calculate_profit_percentage(market_position['market_value'],
+            'profit_loss_percentage': stock_cal.calculate_profit_percentage(market_position['market_value'],
                                                                      transactions_info['total_value'])
         }
 
