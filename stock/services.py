@@ -30,7 +30,7 @@ def get_stock_calculated_detail(investor_id, portfolio_id, symbol):
 
     market_position = jamstockex_api_service.get_stock_trade_info(symbol)
 
-    if (transactions_info and market_position):
+    if transactions_info and market_position:
         market_position['market_value'] = stock_cal.calculate_market_value(market_position['market_price'],
                                                                            transactions_info['total_shares'])
 
