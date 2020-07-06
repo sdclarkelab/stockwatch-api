@@ -3,6 +3,7 @@ from django.shortcuts import get_object_or_404
 import stock.calculations as stock_cal
 import transaction.services as trans_services
 from services import jamstockex_api_service
+import stock.services as stock_services
 from .models import Stock
 from .serializers import StockSerializer
 
@@ -35,17 +36,25 @@ def get_stock_calculated_detail(investor_id, portfolio_id, symbol):
                                                                            transactions_info['total_shares'])
 
         stock_performance = {
-            'profit / loss value': stock_cal.calculate_profit_value(market_position['market_value'],
+            'profit_loss_value': stock_cal.calculate_profit_value(market_position['market_value'],
                                                                     transactions_info['total_value']),
-            'profit / loss %': stock_cal.calculate_profit_percentage(market_position['market_value'],
+            'profit_loss_percentage': stock_cal.calculate_profit_percentage(market_position['market_value'],
                                                                      transactions_info['total_value'])
         }
 
+        stock_weights = stock_services.get_stocks_weights_dicts(investor_id, portfolio_id)
+        stock_weight = 0
+        for weight in stock_weights:
+            if symbol == weight['stock']:
+                stock_weight = weight['weight_percentage']
+                break
+                
         return {
             'symbol': symbol,
             'market_position': market_position,
             'performance': stock_performance,
-            'transaction_info': transactions_info
+            'transaction_info': transactions_info,
+            'stock_weight': stock_weight
         }
     else:
         return {
