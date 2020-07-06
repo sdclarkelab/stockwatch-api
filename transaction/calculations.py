@@ -12,6 +12,7 @@ def calculate_net_amount(transaction):
         return calculate_gross_amount(transaction) + float(transaction['fees'])
     return calculate_gross_amount(transaction) - float(transaction['fees'])
 
+
 @round_to_2_sig
 def calculate_net_price(transaction):
     return calculate_net_amount(transaction) / float(transaction['shares'])
