@@ -28,7 +28,7 @@ def add_transaction(request, investor_id, portfolio_id, symbol):
 
     if request.method == 'POST':
 
-        if request.data['shares'] > 100:
+        if request.data['shares'] >= 100:
             # TODO: Remove stock service call and pass the stock id from post body
             stock = stock_services.get_stock_serializer(investor_id, portfolio_id, symbol)
 

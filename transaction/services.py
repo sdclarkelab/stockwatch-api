@@ -79,3 +79,14 @@ def get_all_stocks_transaction_details(investor_id, portfolio_id):
 
     return transactions
 
+
+def upsert_transaction(investor_id, portfolio_id, stock_id, transaction_request):
+    try:
+        obj, created = Transaction.objects.update_or_create(stock__portfolio__user__id=investor_id,
+                                                            stock__portfolio__id=portfolio_id, stock__id=stock_id,
+                                                            defaults=transaction_request)
+
+        return obj
+    except Exception as e:
+        print(e)
+        return {}

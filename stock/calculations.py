@@ -3,7 +3,10 @@ from helper import round_to_2_sig
 
 @round_to_2_sig
 def calculate_market_value(market_price, shares):
-    return market_price * shares
+    if shares > 0:
+        return market_price * shares
+    else:
+        return 0
 
 
 @round_to_2_sig

@@ -35,27 +35,30 @@ def get_stock_calculated_detail(investor_id, portfolio_id, symbol):
         market_position['market_value'] = stock_cal.calculate_market_value(market_position['market_price'],
                                                                            transactions_info['total_shares'])
 
-        stock_performance = {
-            'profit_loss_value': stock_cal.calculate_profit_value(market_position['market_value'],
-                                                                    transactions_info['total_value']),
-            'profit_loss_percentage': stock_cal.calculate_profit_percentage(market_position['market_value'],
-                                                                     transactions_info['total_value'])
-        }
+        if market_position['market_value'] > 0:
+            stock_performance = {
+                'profit_loss_value': stock_cal.calculate_profit_value(market_position['market_value'],
+                                                                        transactions_info['total_value']),
+                'profit_loss_percentage': stock_cal.calculate_profit_percentage(market_position['market_value'],
+                                                                         transactions_info['total_value'])
+            }
 
-        stock_weights = stock_services.get_stocks_weights_dicts(investor_id, portfolio_id)
-        stock_weight = 0
-        for weight in stock_weights:
-            if symbol == weight['stock']:
-                stock_weight = weight['weight_percentage']
-                break
+            stock_weights = stock_services.get_stocks_weights_dicts(investor_id, portfolio_id)
+            stock_weight = 0
+            for weight in stock_weights:
+                if symbol == weight['stock']:
+                    stock_weight = weight['weight_percentage']
+                    break
                 
-        return {
-            'symbol': symbol,
-            'market_position': market_position,
-            'performance': stock_performance,
-            'transaction_info': transactions_info,
-            'stock_weight': stock_weight
-        }
+            return {
+                'symbol': symbol,
+                'market_position': market_position,
+                'performance': stock_performance,
+                'transaction_info': transactions_info,
+                'stock_weight': stock_weight
+            }
+        else:
+            return None
     else:
         return {
             'symbol': symbol,

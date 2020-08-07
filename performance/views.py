@@ -14,7 +14,9 @@ def performance_list(request, investor_id, portfolio_id):
             stock_dicts = stock_services.get_stocks_dicts(investor_id, portfolio_id)
             response = []
             for stocks in stock_dicts:
-                response.append(stock_services.get_stock_calculated_detail(investor_id, portfolio_id, stocks['symbol']))
+                stock_detail = stock_services.get_stock_calculated_detail(investor_id, portfolio_id, stocks['symbol'])
+                if stock_detail:
+                    response.append(stock_detail)
 
             return Response(response)
     except Exception as e:
