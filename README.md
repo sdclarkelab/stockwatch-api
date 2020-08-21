@@ -54,8 +54,8 @@ DATABASES = {
 > python manage.py runserver 5555
 ```
 
-Login to [admin page](http://127.0.0.1:5555/api/v1/jamstock_admin/) with super user credentials to confirm it works.
-(use "***[custom_admin_page](http://docker_ip_add/api/v1/jamstock_admin/)***" if the docker-machine ip is not using the default IP address)
+Login to [admin page](http://127.0.0.1:5555/api/v1/stockwatch_admin/) with super user credentials to confirm it works.
+(use "***[custom_admin_page](http://docker_ip_add/api/v1/stockwatch_adminn/)***" if the docker-machine ip is not using the default IP address)
 
 
 #### Register Application

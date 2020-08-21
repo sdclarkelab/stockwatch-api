@@ -13,10 +13,17 @@ def performance_list(request, investor_id, portfolio_id):
         if request.method == 'GET':
             stock_dicts = stock_services.get_stocks_dicts(investor_id, portfolio_id)
             response = []
-            for stocks in stock_dicts:
-                stock_detail = stock_services.get_stock_calculated_detail(investor_id, portfolio_id, stocks['symbol'])
+            trans_datas = stock_services.get_stock_transaction_detail()
+
+            for trans_data in trans_datas:
+                stock_detail = stock_services.get_stock_calculated_detail(investor_id, portfolio_id, trans_data['symbol'],
+                                                                          trans_data)
                 if stock_detail:
                     response.append(stock_detail)
+            # for stocks in stock_dicts:
+            #     stock_detail = stock_services.get_stock_calculated_detail(investor_id, portfolio_id, stocks['symbol'], trans_data)
+            #     if stock_detail:
+            #         response.append(stock_detail)
 
             return Response(response)
     except Exception as e:

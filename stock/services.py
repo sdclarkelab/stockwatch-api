@@ -4,8 +4,9 @@ import stock.calculations as stock_cal
 import transaction.services as trans_services
 from services import jamstockex_api_service
 import stock.services as stock_services
-from .models import Stock
-from .serializers import StockSerializer
+from .models import Stock, StockCalculatedDetail
+from .serializers import StockSerializer, StockCalculatedDetailSerializer
+from django.db import connection
 
 
 #  -------------------------------------
@@ -26,8 +27,30 @@ def get_stocks_dicts(investor_id, portfolio_id):
     return stocks
 
 
-def get_stock_calculated_detail(investor_id, portfolio_id, symbol):
-    transactions_info = trans_services.get_stock_transaction_detail(investor_id, portfolio_id, symbol)
+def get_stock_transaction_detail():
+    # with connection.cursor() as cursor:
+    #     cursor.execute('select ss.symbol, sum(tt.shares) as total_shares, sum(tt.net_amount) as total_net_amount, '
+    #                    'CAST((sum(tt.net_amount)/nullif(sum(tt.shares),0)) AS DECIMAL(10,2)) as avg_amount from '
+    #                    'stock_stock ss LEFT JOIN transaction_transaction tt ON ss.id = tt.stock_id GROUP BY ss.symbol;')
+    #     row = cursor.fetchall()
+    #
+    # return row
+    try:
+        stockDetail = StockCalculatedDetail.objects.raw(
+            'select ss.id as id, ss.symbol, sum(tt.shares) as total_shares, sum(tt.net_amount) as total_net_amount, '
+            'CAST((sum(tt.net_amount)/nullif(sum(tt.shares),0)) AS DECIMAL(10,2)) as avg_amount, '
+            '(sum(tt.shares) * CAST((sum(tt.net_amount)/nullif(sum(tt.shares),0)) AS DECIMAL(10,2))) as total_value '
+            'from stock_stock ss  '
+            'LEFT JOIN transaction_transaction tt ON ss.id = tt.stock_id GROUP BY ss.symbol, ss.id;')
+        seq = StockCalculatedDetailSerializer(stockDetail, many=True).data
+
+        return seq
+    except Exception as e:
+        print(e)
+
+
+def get_stock_calculated_detail(investor_id, portfolio_id, symbol, transactions_info):
+    # transactions_info = trans_services.get_stock_transaction_detail(investor_id, portfolio_id, symbol)
 
     market_position = jamstockex_api_service.get_stock_trade_info(symbol)
 
@@ -38,9 +61,9 @@ def get_stock_calculated_detail(investor_id, portfolio_id, symbol):
         if market_position['market_value'] > 0:
             stock_performance = {
                 'profit_loss_value': stock_cal.calculate_profit_value(market_position['market_value'],
-                                                                        transactions_info['total_value']),
+                                                                      transactions_info['total_value']),
                 'profit_loss_percentage': stock_cal.calculate_profit_percentage(market_position['market_value'],
-                                                                         transactions_info['total_value'])
+                                                                                transactions_info['total_value'])
             }
 
             stock_weights = stock_services.get_stocks_weights_dicts(investor_id, portfolio_id)
@@ -49,7 +72,7 @@ def get_stock_calculated_detail(investor_id, portfolio_id, symbol):
                 if symbol == weight['stock']:
                     stock_weight = weight['weight_percentage']
                     break
-                
+
             return {
                 'symbol': symbol,
                 'market_position': market_position,
@@ -148,4 +171,3 @@ def get_stocks_totals(investor_id, portfolio_id):
     }
 
     return stock_totals
-
