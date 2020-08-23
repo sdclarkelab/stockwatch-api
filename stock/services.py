@@ -2,8 +2,6 @@ from django.shortcuts import get_object_or_404
 
 import stock.calculations as stock_cal
 import transaction.services as trans_services
-from services import jamstockex_api_service
-import stock.services as stock_services
 from .models import Stock, StockCalculatedDetail
 from .serializers import StockSerializer, StockCalculatedDetailSerializer
 from django.db import connection
@@ -22,127 +20,119 @@ def get_stocks_serializers(investor_id, portfolio_id):
     return stocks
 
 
-def get_stocks_dicts(investor_id, portfolio_id):
+def get_stocks(investor_id, portfolio_id):
     stocks = StockSerializer(get_stocks_serializers(investor_id, portfolio_id), many=True).data
     return stocks
 
 
-def get_stock_transaction_detail():
-    # with connection.cursor() as cursor:
-    #     cursor.execute('select ss.symbol, sum(tt.shares) as total_shares, sum(tt.net_amount) as total_net_amount, '
-    #                    'CAST((sum(tt.net_amount)/nullif(sum(tt.shares),0)) AS DECIMAL(10,2)) as avg_amount from '
-    #                    'stock_stock ss LEFT JOIN transaction_transaction tt ON ss.id = tt.stock_id GROUP BY ss.symbol;')
-    #     row = cursor.fetchall()
-    #
-    # return row
+def get_stock_totals():
     try:
-        stockDetail = StockCalculatedDetail.objects.raw(
-            'select ss.id as id, ss.symbol, sum(tt.shares) as total_shares, sum(tt.net_amount) as total_net_amount, '
-            'CAST((sum(tt.net_amount)/nullif(sum(tt.shares),0)) AS DECIMAL(10,2)) as avg_amount, '
-            '(sum(tt.shares) * CAST((sum(tt.net_amount)/nullif(sum(tt.shares),0)) AS DECIMAL(10,2))) as total_value '
-            'from stock_stock ss  '
-            'LEFT JOIN transaction_transaction tt ON ss.id = tt.stock_id GROUP BY ss.symbol, ss.id;')
-        seq = StockCalculatedDetailSerializer(stockDetail, many=True).data
 
-        return seq
+        stock_totals = StockCalculatedDetail.objects.raw(
+            'select '
+                'st.id, '
+                'st.symbol, '
+                'st.total_shares, '
+                'snt.avg_net_price, '
+                'snt.total_net_amount, '
+                '(snt.avg_net_price * st.total_shares) as current_value '
+            'from '
+                '( '
+                    'select '
+                        'ss.id as id, ss.symbol, sum(tt.net_amount) as total_net_amount, cast((sum(tt.net_amount)/ '
+                        'nullif(sum(tt.shares), 0)) as DECIMAL(10, 2)) as avg_net_price '
+                    'from '
+                        'stock_stock ss '
+                    'left join transaction_transaction tt on '
+                        'ss.id = tt.stock_id '
+                    'where '
+                        'tt."action" in (\'buy\') '
+                    'group by '
+                        'ss.symbol, ss.id '
+                    'having '
+                        'ss.status_id = 1 ) snt '
+            'left join ( '
+                'select '
+                    'ss.id as id, ss.symbol, sum(tt.shares) as total_shares '
+                'from '
+                    'stock_stock ss '
+                'left join transaction_transaction tt on '
+                    'ss.id = tt.stock_id '
+                'group by '
+                    'ss.symbol, ss.id ) st on '
+                '(st.id = snt.id) '
+            'order by '
+                'st.symbol'
+        )
+
+        return StockCalculatedDetailSerializer(stock_totals, many=True).data
     except Exception as e:
         print(e)
 
 
-def get_stock_calculated_detail(investor_id, portfolio_id, symbol, transactions_info):
-    # transactions_info = trans_services.get_stock_transaction_detail(investor_id, portfolio_id, symbol)
+def create_stock_performance_response(stock_totals, stock_index_data_list):
+    try:
 
-    market_position = jamstockex_api_service.get_stock_trade_info(symbol)
+        stock_details = []
+        total_market_value = 0
+        total_current_value = 0
 
-    if transactions_info and market_position:
-        market_position['market_value'] = stock_cal.calculate_market_value(market_position['market_price'],
-                                                                           transactions_info['total_shares'])
+        for stock_total in stock_totals:
 
-        if market_position['market_value'] > 0:
-            stock_performance = {
-                'profit_loss_value': stock_cal.calculate_profit_value(market_position['market_value'],
-                                                                      transactions_info['total_value']),
-                'profit_loss_percentage': stock_cal.calculate_profit_percentage(market_position['market_value'],
-                                                                                transactions_info['total_value'])
+            symbol = stock_total['symbol']
+
+            stock_detail = {
+                'symbol': stock_total['symbol'],
+                'market_position': {},
+                'performance': {},
+                'transaction_info': {},
+                'stock_weight': {}
             }
 
-            stock_weights = stock_services.get_stocks_weights_dicts(investor_id, portfolio_id)
-            stock_weight = 0
-            for weight in stock_weights:
-                if symbol == weight['stock']:
-                    stock_weight = weight['weight_percentage']
-                    break
+            # Get Market object
+            stock_index_data = next((item.get('trade_info', {}) for item in stock_index_data_list if
+                                     item.get('symbol', {}) == symbol and item.get('currency', {}) == 'JMD'), None)
 
-            return {
-                'symbol': symbol,
-                'market_position': market_position,
-                'performance': stock_performance,
-                'transaction_info': transactions_info,
-                'stock_weight': stock_weight
-            }
-        else:
-            return None
-    else:
-        return {
-            'symbol': symbol,
-            'market_position': {},
-            'performance': {},
-            'transaction_info': {}
-        }
+            if stock_index_data and "market_price" in stock_index_data and stock_total['total_shares'] > 0:
 
+                market_value = stock_cal.calculate_market_value(stock_index_data['market_price'],
+                                                                stock_total['total_shares'])
 
-def get_stock_detail_dict(investor_id, portfolio_id, symbol):
-    stock_serializer = StockSerializer(get_stock_serializer(investor_id, portfolio_id, symbol)).data
-    stock_calculated_dict = get_stock_calculated_detail(investor_id, portfolio_id, symbol)
+                total_market_value += market_value
+                total_current_value += stock_total['current_value']
 
-    stock_serializer.update(stock_calculated_dict)
+                # Update stock detail response
+                stock_detail['transaction_info'] = stock_total
+                stock_detail['market_position'] = stock_index_data
+                stock_detail['market_position']['market_value'] = market_value
+                stock_detail['performance'] = {
+                    'profit_loss_value': stock_cal.calculate_profit_value(market_value,
+                                                                          stock_total['current_value']),
+                    'profit_loss_percentage': stock_cal.calculate_profit_percentage(market_value,
+                                                                                    stock_total[
+                                                                                        'current_value'])
+                }
+                stock_details.append(stock_detail)
 
-    return stock_serializer
+        for stock_detail in stock_details:
+            stock_detail['stock_weight']['owned'] = stock_cal.calculate_stock_weight(stock_detail['transaction_info']['current_value'], total_current_value)
+            stock_detail['stock_weight']['market'] = stock_cal.calculate_stock_weight(stock_detail['market_position']['market_value'], total_market_value)
 
-
-def get_stocks_weights_dicts(investor_id, portfolio_id):
-    # Calculate stocks market values
-    market_values = get_total_market_values_dicts(investor_id, portfolio_id)
-
-    stock_weights = []
-    for stock in market_values['stocks']:
-        stock_weight = {'stock': '', 'weight_percentage': 0}
-        stock_weight['stock'] = stock['symbol']
-        stock_weight['weight_percentage'] = stock_cal.calculate_stock_weight(stock['market_price'],
-                                                                             market_values['total'])
-
-        stock_weights.append(stock_weight)
-
-    return stock_weights
+        return stock_details
+    except Exception as e:
+        print(e)
 
 
-def get_total_market_values_dicts(investor_id, portfolio_id):
-    total_market_values_dicts = {'total': 0,
-                                 'stocks': []}
 
-    #  Get market price
-    market_positions = jamstockex_api_service.get_stocks_infos()
 
-    # Get Transaction info
-    transactions_infos = trans_services.get_all_stocks_transaction_details(investor_id, portfolio_id)
+def get_total_market_value(symbol, market_price, total_shares, total_market_values_dicts):
 
-    for transactions_info in transactions_infos:
-        # market_price = next(item['trade_info']['market_price'] for item in market_positions if
-        #                     item["symbol"] == transactions_info['symbol'])
-        market_price = 0
-        for item in market_positions:
-            if item["symbol"] == transactions_info['symbol'] and "trade_info" in item:
-                market_price = item['trade_info']['market_price']
 
-        stock_market_dict = {'symbol': '', 'market_price': 0}
+    stock_market_dict = {'symbol': symbol, 'market_price': stock_cal.calculate_market_value(market_price, total_shares)}
 
-        stock_market_dict['symbol'] = transactions_info['symbol']
-        stock_market_dict['market_price'] = stock_cal.calculate_market_value(market_price,
-                                                                             transactions_info['total_shares'])
-        total_market_values_dicts['stocks'].append(stock_market_dict)
+    total_market_values_dicts['stocks'].append(stock_market_dict)
 
-        total_market_values_dicts['total'] += stock_cal.calculate_market_value(market_price,
-                                                                               transactions_info['total_shares'])
+    total_market_values_dicts['total'] += stock_cal.calculate_market_value(market_price, total_shares)
 
     return total_market_values_dicts
 
@@ -151,14 +141,14 @@ def update_stock_total_market_value(stocks, investor_id, portfolio_id):
     total_market_value = 0
     for stock in stocks:
         # TODO: Refactor code
-        stock.update(get_stock_calculated_detail(investor_id, portfolio_id, stock['symbol']))
+        # stock.update(get_stock_calculated_detail(investor_id, portfolio_id, stock['symbol']))
         total_market_value += stock['market_position']['market_value']
 
     return total_market_value
 
 
 def get_stocks_totals(investor_id, portfolio_id):
-    stocks = get_stocks_dicts(investor_id, portfolio_id)
+    stocks = get_stocks(investor_id, portfolio_id)
     total_market_value = 0
     total_current_value = 0
     for stock in stocks:

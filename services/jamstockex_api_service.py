@@ -20,7 +20,7 @@ def get_market_price(symbol):
 
 
 def get_stocks_infos():
-    response = req.get(f'{settings.JAMSTOCKEX_API}/stocks/')
+    response = req.get(f'{settings.JAMSTOCKEX_API}/stocks')
     return response.json()
 
 

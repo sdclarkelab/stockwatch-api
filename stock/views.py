@@ -38,7 +38,7 @@ def stock_list(request, investor_id, portfolio_id):
     """
 
     if request.method == 'GET':
-        return Response(stock_services.get_stocks_dicts(investor_id, portfolio_id))
+        return Response(stock_services.get_stocks(investor_id, portfolio_id))
 
     if request.method == 'POST':
 
