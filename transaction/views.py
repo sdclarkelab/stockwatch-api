@@ -9,6 +9,8 @@ import transaction.services as transaction_services
 from utils.custom_json_resp import CustomJsonResponse
 from .serializers import TransactionSerializer
 
+import json
+
 
 @api_view(['GET', 'POST', 'DELETE'])
 @protected_resource()
@@ -28,12 +30,15 @@ def add_transaction(request, investor_id, portfolio_id, symbol):
 
     if request.method == 'POST':
 
-        if request.data['shares'] >= 1:
+        body_unicode = request.body.decode('utf-8')
+        body_data = json.loads(body_unicode)
+
+        if body_data['shares'] >= 1:
             # TODO: Remove stock service call and pass the stock id from post body
             stock = stock_services.get_stock_serializer(investor_id, portfolio_id, symbol)
 
             #  Add stock id to request body. ***DO NOT REMOVE***
-            transaction_request = request.data
+            transaction_request = body_data
             transaction_request["stock"] = stock.id
 
             transaction_request.update(transaction_services.get_transaction_calculation_response(transaction_request))

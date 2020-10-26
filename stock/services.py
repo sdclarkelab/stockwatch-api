@@ -123,8 +123,6 @@ def create_stock_performance_response(stock_totals, stock_index_data_list):
         print(e)
 
 
-
-
 def get_total_market_value(symbol, market_price, total_shares, total_market_values_dicts):
 
 

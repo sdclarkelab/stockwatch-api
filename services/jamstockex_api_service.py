@@ -1,5 +1,11 @@
 import requests as req
+import json
 from django.conf import settings
+from datetime import datetime
+
+
+import redis
+r = redis.Redis(host='localhost', port=6379, db=0)
 
 
 def is_stock_symbol_valid(symbol):
@@ -20,8 +26,38 @@ def get_market_price(symbol):
 
 
 def get_stocks_infos():
-    response = req.get(f'{settings.JAMSTOCKEX_API}/stocks')
-    return response.json()
+    try:
+
+        # if response has previous date, pull from API otherwise pull from cache
+        # jam_stock_res = req.get(f'{settings.JAMSTOCKEX_API}/stocks')
+        # # r.set('stock', jam_stock_res.text)
+        # response = jam_stock_res.json()
+
+        # response_last_updated_date = datetime.strptime(response['lastUpdatedDate'], '%Y-%m-%dT%H:%M:%S.%fZ').date()
+
+        today = datetime.today().strftime('%Y-%m-%d')
+
+        data = r.get('stock')
+        response = None
+        if data:
+            response = json.loads(data)
+        if not response:
+            jam_stock_res = req.get(f'{settings.JAMSTOCKEX_API}/stocks')
+            r.set('stock', jam_stock_res.text)
+            response = jam_stock_res.json()
+
+        else:
+            response_last_updated_date = datetime.strptime(response['lastUpdatedDate'], '%Y-%m-%dT%H:%M:%S.%fZ').date()
+
+            if today != str(response_last_updated_date):
+                jam_stock_res = req.get(f'{settings.JAMSTOCKEX_API}/stocks')
+                r.set('stock', jam_stock_res.text)
+                response = jam_stock_res.json()
+
+        return response['result']
+    except Exception as e:
+        print(e)
+        return {}
 
 
 def get_stock_trade_info(symbol):
