@@ -5,7 +5,10 @@ from datetime import datetime
 
 
 import redis
-r = redis.Redis(host='localhost', port=6379, db=0)
+try:
+    r = redis.Redis(host='localhost', port=6379, db=0)
+except Exception as e:
+    print(e)
 
 
 def is_stock_symbol_valid(symbol):
@@ -34,25 +37,27 @@ def get_stocks_infos():
         # response = jam_stock_res.json()
 
         # response_last_updated_date = datetime.strptime(response['lastUpdatedDate'], '%Y-%m-%dT%H:%M:%S.%fZ').date()
-
         today = datetime.today().strftime('%Y-%m-%d')
+        cached_data = None
 
-        data = r.get('stock')
-        response = None
-        if data:
-            response = json.loads(data)
-        if not response:
-            jam_stock_res = req.get(f'{settings.JAMSTOCKEX_API}/stocks')
-            r.set('stock', jam_stock_res.text)
-            response = jam_stock_res.json()
+        try:
+            cached_data = r.get('stock')
+        except Exception as error:
+            print(error)
+            pass
+
+        response_last_updated_date = str(datetime.strptime(json.loads(cached_data)['lastUpdatedDate'], '%Y-%m-%dT%H:%M:%S.%fZ').date())
+        if cached_data and response_last_updated_date == today:
+            response = json.loads(cached_data)
 
         else:
-            response_last_updated_date = datetime.strptime(response['lastUpdatedDate'], '%Y-%m-%dT%H:%M:%S.%fZ').date()
-
-            if today != str(response_last_updated_date):
-                jam_stock_res = req.get(f'{settings.JAMSTOCKEX_API}/stocks')
+            jam_stock_res = req.get(f'{settings.JAMSTOCKEX_API}/stocks')
+            try:
                 r.set('stock', jam_stock_res.text)
-                response = jam_stock_res.json()
+            except Exception as error:
+                print(error)
+                pass
+            response = jam_stock_res.json()
 
         return response['result']
     except Exception as e:
