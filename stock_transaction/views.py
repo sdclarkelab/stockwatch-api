@@ -5,21 +5,14 @@ from rest_framework.response import Response
 
 import helper
 import stock.services as stock_services
-from services import jamstockex_api_service
-from utils.custom_json_resp import CustomJsonResponse
-from stock.serializers import StockSerializer
-
-
 import transaction.services as transaction_services
 from transaction.serializers import TransactionSerializer
-
-import json
+from utils.custom_json_resp import CustomJsonResponse
 
 
 @api_view(['POST'])
 @protected_resource()
 def create_stock_and_transaction(request, investor_id, portfolio_id):
-
     try:
         stock_payload = request.data['stock']
         transaction = request.data['transaction']
