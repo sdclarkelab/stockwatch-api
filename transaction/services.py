@@ -1,9 +1,10 @@
 from django.db.models import Sum, Avg, F, FloatField, ExpressionWrapper
 from django.shortcuts import get_object_or_404
 
+import helper
 import transaction.calculations as trans_cal
 from .models import Transaction
-from .serializers import TransactionInfoSerializers, TransactionInfoSerializer
+from .serializers import TransactionInfoSerializers, TransactionInfoSerializer, TransactionSerializer
 
 
 def get_all_transactions(investor_id, portfolio_id):
@@ -90,3 +91,20 @@ def upsert_transaction(investor_id, portfolio_id, stock_id, transaction_request)
     except Exception as e:
         print(e)
         return {}
+
+
+def create_transaction(transaction, stock_id):
+    """
+    Create a transaction for a stock.
+    :param transaction:
+    :param stock_id:
+    :return:
+    """
+
+    try:
+        transaction["stock"] = stock_id
+        transaction.update(get_transaction_calculation_response(transaction))
+        serializer = TransactionSerializer(data=transaction)
+        return helper.save_serializer(serializer)
+    except Exception as create_transaction_error:
+        print(create_transaction_error)

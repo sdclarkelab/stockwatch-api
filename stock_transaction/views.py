@@ -3,33 +3,30 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-import helper
 import stock.services as stock_services
 import transaction.services as transaction_services
-from transaction.serializers import TransactionSerializer
 from utils.custom_json_resp import CustomJsonResponse
 
 
 @api_view(['POST'])
 @protected_resource()
 def create_stock_and_transaction(request, investor_id, portfolio_id):
+    """
+    Adds a stock to the database and it's first transaction.
+    :param request:
+    :param investor_id:
+    :param portfolio_id:
+    :return:
+    """
     try:
         stock_payload = request.data['stock']
-        transaction = request.data['transaction']
+        transaction_payload = request.data['transaction']
 
-        if transaction['shares'] >= 1:
-            stock = stock_services.create_stock(stock_payload)
+        # Create stock.
+        stock_obj = stock_services.create_stock(stock_payload)
 
-            #  Add stock id to request body. ***DO NOT REMOVE***
-            transaction_request = transaction
-            transaction_request["stock"] = stock.data['id']
-
-            transaction_request.update(transaction_services.get_transaction_calculation_response(transaction_request))
-
-            serializer = TransactionSerializer(data=transaction_request)
-            return helper.save_serializer(serializer)
-        else:
-            return Response({"detail": "Shares must be greater than 100."}, status=status.HTTP_400_BAD_REQUEST)
+        # Add stock id to request body. ***DO NOT REMOVE***
+        return transaction_services.create_transaction(transaction_payload, stock_obj.data['id'])
 
     except Exception as create_stock_and_transaction_error:
         print(create_stock_and_transaction_error)

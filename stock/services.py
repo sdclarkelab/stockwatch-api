@@ -1,14 +1,14 @@
+import json
+from datetime import datetime
+
+import redis
 from django.shortcuts import get_object_or_404
 
+import helper
 import stock.calculations as stock_cal
-import transaction.services as trans_services
+from services import jamstockex_api_service
 from .models import Stock, StockCalculatedDetail
 from .serializers import StockSerializer, StockCalculatedDetailSerializer
-from django.db import connection
-import redis
-import json
-from services import jamstockex_api_service
-import helper
 
 try:
     # TODO: Use environment variable for redis properties.
@@ -185,8 +185,8 @@ def get_stock_names_from_cache():
 def create_stock(stock):
     try:
         if jamstockex_api_service.is_stock_symbol_valid(stock['symbol']):
+            stock["created_date"] = datetime.today()
             serializer = StockSerializer(data=stock)
-
             return helper.save_serializer(serializer)
     except Exception as create_stock_error:
         print(create_stock_error)
