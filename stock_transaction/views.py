@@ -20,26 +20,16 @@ import json
 @protected_resource()
 def create_stock_and_transaction(request, investor_id, portfolio_id):
 
-    stock = request.data['stock']
-    symbol = stock['symbol']
-
-    if jamstockex_api_service.is_stock_symbol_valid(symbol):
-        stock['portfolio'] = portfolio_id
-        serializer = StockSerializer(data=stock)
-
-        helper.save_serializer(serializer)
-
-        # body_unicode = request.body.decode('utf-8')
-        # body_data = json.loads(body_unicode)
+    try:
+        stock_payload = request.data['stock']
         transaction = request.data['transaction']
 
         if transaction['shares'] >= 1:
-            # TODO: Remove stock service call and pass the stock id from post body
-            stock = stock_services.get_stock_serializer(investor_id, portfolio_id, symbol)
+            stock = stock_services.create_stock(stock_payload)
 
             #  Add stock id to request body. ***DO NOT REMOVE***
             transaction_request = transaction
-            transaction_request["stock"] = stock.id
+            transaction_request["stock"] = stock.data['id']
 
             transaction_request.update(transaction_services.get_transaction_calculation_response(transaction_request))
 
@@ -48,5 +38,7 @@ def create_stock_and_transaction(request, investor_id, portfolio_id):
         else:
             return Response({"detail": "Shares must be greater than 100."}, status=status.HTTP_400_BAD_REQUEST)
 
-    else:
-        return Response(CustomJsonResponse.return_portfolio_stock_not_found(), status=status.HTTP_400_BAD_REQUEST)
+    except Exception as create_stock_and_transaction_error:
+        print(create_stock_and_transaction_error)
+        return Response(CustomJsonResponse.return_server_error(),
+                        status=status.HTTP_500_INTERNAL_SERVER_ERROR)
