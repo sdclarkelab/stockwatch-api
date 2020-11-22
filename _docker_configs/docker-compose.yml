@@ -12,6 +12,14 @@ services:
     - "5432:5432"
     networks:
     - stockwatch_net
+  cache_db:
+    container_name: stockwatch_api_redis_db
+    image: redis
+    restart: always
+    ports:
+      - "6379:6379"
+    networks:
+      - stockwatch_net
 
 networks:
   stockwatch_net:

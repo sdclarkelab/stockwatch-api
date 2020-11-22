@@ -38,7 +38,7 @@ def stock_list(request, investor_id, portfolio_id):
     """
 
     if request.method == 'GET':
-        return Response(stock_services.get_stocks_dicts(investor_id, portfolio_id))
+        return Response(stock_services.get_stocks(investor_id, portfolio_id))
 
     if request.method == 'POST':
 
@@ -65,3 +65,15 @@ def stocks_weights(request, investor_id, portfolio_id):
 
     if request.method == 'GET':
         return Response(stock_services.get_stocks_weights_dicts(investor_id, portfolio_id), status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+@protected_resource()
+def stock_names(request):
+    """
+
+    :param request:
+    :return:
+    """
+    if request.method == 'GET':
+        return Response(stock_services.get_stock_names_from_cache(), status=status.HTTP_200_OK)

@@ -24,4 +24,9 @@ urlpatterns = [
     #               IMPORTERS
     #  -------------------------------------
     path('<int:portfolio_id>/import/', include('importer.urls')),
+
+    #  -------------------------------------
+    #               STOCK_TRANSACTION
+    #  -------------------------------------
+    path('<int:portfolio_id>/stock_transaction', include('stock_transaction.urls'))
 ]

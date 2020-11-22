@@ -4,6 +4,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 import stock.services as stock_services
+from services import jamstockex_api_service
 
 
 @api_view(['GET'])
@@ -11,10 +12,12 @@ import stock.services as stock_services
 def performance_list(request, investor_id, portfolio_id):
     try:
         if request.method == 'GET':
-            stock_dicts = stock_services.get_stocks_dicts(investor_id, portfolio_id)
             response = []
-            for stocks in stock_dicts:
-                response.append(stock_services.get_stock_calculated_detail(investor_id, portfolio_id, stocks['symbol']))
+            stock_totals = stock_services.get_stock_totals()
+
+            if stock_totals:
+                stock_index_data_list = jamstockex_api_service.get_stocks_infos()
+                response = stock_services.create_stock_performance_response(stock_totals, stock_index_data_list)
 
             return Response(response)
     except Exception as e:

@@ -1,3 +1,5 @@
+import json
+
 from oauth2_provider.decorators import protected_resource
 from rest_framework import status
 from rest_framework.decorators import api_view
@@ -28,18 +30,14 @@ def add_transaction(request, investor_id, portfolio_id, symbol):
 
     if request.method == 'POST':
 
-        if request.data['shares'] > 100:
+        body_unicode = request.body.decode('utf-8')
+        body_data = json.loads(body_unicode)
+
+        if body_data['shares'] >= 1:
             # TODO: Remove stock service call and pass the stock id from post body
             stock = stock_services.get_stock_serializer(investor_id, portfolio_id, symbol)
 
-            #  Add stock id to request body. ***DO NOT REMOVE***
-            transaction_request = request.data
-            transaction_request["stock"] = stock.id
-
-            transaction_request.update(transaction_services.get_transaction_calculation_response(transaction_request))
-
-            serializer = TransactionSerializer(data=transaction_request)
-            return helper.save_serializer(serializer)
+            return transaction_services.create_transaction(body_data, stock.id)
         else:
             return Response({"detail": "Shares must be greater than 100."}, status=status.HTTP_400_BAD_REQUEST)
 
