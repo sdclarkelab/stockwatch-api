@@ -9,9 +9,9 @@ class Stock(models.Model):
     portfolio = models.ForeignKey('portfolio.Portfolio', on_delete=models.CASCADE, related_name='portfolio_stock')
     symbol = models.TextField(max_length=10)
     status = models.ForeignKey(StockStatus, on_delete=models.CASCADE, related_name='stock_status', null=True)
-
-    class Meta:
-        unique_together = (('portfolio', 'symbol'),)
+    last_updated_date = models.DateTimeField(auto_now_add=True, null=True)
+    created_date = models.DateTimeField(null=True)
+    sold_date = models.DateTimeField(null=True)
 
 
 class StockCalculatedDetail(models.Model):

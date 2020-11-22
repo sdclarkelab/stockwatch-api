@@ -64,7 +64,8 @@ INSTALLED_APPS = [
     'investor.apps.InvestorConfig',
     'stock.apps.StockConfig',
     'transaction.apps.TransactionConfig',
-    'plan.apps.PlanConfig'
+    'plan.apps.PlanConfig',
+    'stock_transaction.apps.StockTransactionConfig',
 ]
 
 AUTH_USER_MODEL = 'investor.Investor'

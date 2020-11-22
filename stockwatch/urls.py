@@ -16,11 +16,13 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from .views import page_not_found
+from stock import views as stock_views
 
 urlpatterns = [
     path('api/v1/stockwatch_admin/', admin.site.urls),
     path('api/v1/stockwatch_admin/o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
     path('api/v1/investor/', include('investor.urls')),
+    path('api/v1/stockNames/', stock_views.stock_names, name='stock_names'),
 
 ]
 

@@ -1,20 +1,24 @@
 import requests as req
 import json
+import redis
 from django.conf import settings
 from datetime import datetime
 
-
-import redis
-r = redis.Redis(host='localhost', port=6379, db=0)
+try:
+    # TODO: Use environment variable for redis properties.
+    r = redis.Redis(host='localhost', port=6379, db=0)
+except Exception as e:
+    print(e)
 
 
 def is_stock_symbol_valid(symbol):
     is_valid = False
 
-    #  Get response from AWS lambda function
-    response = req.get(f'{settings.JAMSTOCKEX_API}/stocks/{symbol}?projection=symbol')
+    stock_names = json.loads(r.get('stock_names'))
 
-    if response.status_code == 200 and response.json():
+    symbols = [stock_name['symbol'] for stock_name in stock_names]
+
+    if symbol in symbols:
         is_valid = True
 
     return is_valid
@@ -25,38 +29,77 @@ def get_market_price(symbol):
     return response.json()['trade_info']['market_price']
 
 
+def _get_cached_jamstockex_stocks_and_last_updated_date():
+    """
+    Return stock dict if found in cache.
+    :return: dict
+    """
+    try:
+        stock_cache = r.get('stock')
+
+        if not stock_cache:
+            raise Exception("No cached stocks")
+
+        # convert redis response to dictionary.
+        response = json.loads(stock_cache)
+
+        last_updated_date = response.get('lastUpdatedDate', dict())
+        cached_last_updated_date = str(datetime.strptime(last_updated_date, '%Y-%m-%dT%H:%M:%S.%fZ').date())
+
+        return response['result'], cached_last_updated_date
+
+    except Exception as stock_cache_error:
+        print(stock_cache_error)
+        return dict(), str()
+
+
+def get_jamstockex_stocks():
+    """
+
+    :return:
+    """
+    try:
+        jam_stock_res = req.get(f'{settings.JAMSTOCKEX_API}/stocks')
+        r.set('stock', jam_stock_res.text)
+
+        stocks_objs = jam_stock_res.json()['result']
+
+        return stocks_objs
+    except Exception as error:
+        print(error)
+        return dict()
+
+
 def get_stocks_infos():
+    """
+
+    :return:
+    """
     try:
 
-        # if response has previous date, pull from API otherwise pull from cache
-        # jam_stock_res = req.get(f'{settings.JAMSTOCKEX_API}/stocks')
-        # # r.set('stock', jam_stock_res.text)
-        # response = jam_stock_res.json()
+        stock_info, cached_last_updated_date = _get_cached_jamstockex_stocks_and_last_updated_date()
 
-        # response_last_updated_date = datetime.strptime(response['lastUpdatedDate'], '%Y-%m-%dT%H:%M:%S.%fZ').date()
+        if cached_last_updated_date == datetime.today().strftime('%Y-%m-%d'):
+            jse_stocks = get_jamstockex_stocks()
 
-        today = datetime.today().strftime('%Y-%m-%d')
+            if jse_stocks:
+                stock_info = jse_stocks
 
-        data = r.get('stock')
-        response = None
-        if data:
-            response = json.loads(data)
-        if not response:
-            jam_stock_res = req.get(f'{settings.JAMSTOCKEX_API}/stocks')
-            r.set('stock', jam_stock_res.text)
-            response = jam_stock_res.json()
+        stock_names = [
+            {
+                'instrument_name': stocks_obj['instrument_name'],
+                'symbol': stocks_obj['symbol']
+            }
+            for stocks_obj in stock_info
+        ]
 
-        else:
-            response_last_updated_date = datetime.strptime(response['lastUpdatedDate'], '%Y-%m-%dT%H:%M:%S.%fZ').date()
+        sorted_stock_names = sorted(stock_names, key=lambda k: k['instrument_name'])
+        r.set('stock_names', json.dumps(sorted_stock_names))
 
-            if today != str(response_last_updated_date):
-                jam_stock_res = req.get(f'{settings.JAMSTOCKEX_API}/stocks')
-                r.set('stock', jam_stock_res.text)
-                response = jam_stock_res.json()
-
-        return response['result']
+        return stock_info
     except Exception as e:
         print(e)
+        print('Something went wrong')
         return {}
 
 

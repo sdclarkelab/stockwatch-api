@@ -1,10 +1,20 @@
+import json
+from datetime import datetime
+
+import redis
 from django.shortcuts import get_object_or_404
 
+import helper
 import stock.calculations as stock_cal
-import transaction.services as trans_services
+from services import jamstockex_api_service
 from .models import Stock, StockCalculatedDetail
 from .serializers import StockSerializer, StockCalculatedDetailSerializer
-from django.db import connection
+
+try:
+    # TODO: Use environment variable for redis properties.
+    r = redis.Redis(host='localhost', port=6379, db=0)
+except Exception as e:
+    print(e)
 
 
 #  -------------------------------------
@@ -30,39 +40,39 @@ def get_stock_totals():
 
         stock_totals = StockCalculatedDetail.objects.raw(
             'select '
-                'st.id, '
-                'st.symbol, '
-                'st.total_shares, '
-                'snt.avg_net_price, '
-                'snt.total_net_amount, '
-                '(snt.avg_net_price * st.total_shares) as current_value '
+            'st.id, '
+            'st.symbol, '
+            'st.total_shares, '
+            'snt.avg_net_price, '
+            'snt.total_net_amount, '
+            '(snt.avg_net_price * st.total_shares) as current_value '
             'from '
-                '( '
-                    'select '
-                        'ss.id as id, ss.symbol, sum(tt.net_amount) as total_net_amount, cast((sum(tt.net_amount)/ '
-                        'nullif(sum(tt.shares), 0)) as DECIMAL(10, 2)) as avg_net_price '
-                    'from '
-                        'stock_stock ss '
-                    'left join transaction_transaction tt on '
-                        'ss.id = tt.stock_id '
-                    'where '
-                        'tt."action" in (\'buy\') '
-                    'group by '
-                        'ss.symbol, ss.id '
-                    'having '
-                        'ss.status_id = 1 ) snt '
+            '( '
+            'select '
+            'ss.id as id, ss.symbol, sum(tt.net_amount) as total_net_amount, cast((sum(tt.net_amount)/ '
+            'nullif(sum(tt.shares), 0)) as DECIMAL(10, 2)) as avg_net_price '
+            'from '
+            'stock_stock ss '
+            'left join transaction_transaction tt on '
+            'ss.id = tt.stock_id '
+            'where '
+            'tt."action" in (\'buy\') '
+            'group by '
+            'ss.symbol, ss.id '
+            'having '
+            'ss.status_id = 1 ) snt '
             'left join ( '
-                'select '
-                    'ss.id as id, ss.symbol, sum(tt.shares) as total_shares '
-                'from '
-                    'stock_stock ss '
-                'left join transaction_transaction tt on '
-                    'ss.id = tt.stock_id '
-                'group by '
-                    'ss.symbol, ss.id ) st on '
-                '(st.id = snt.id) '
+            'select '
+            'ss.id as id, ss.symbol, sum(tt.shares) as total_shares '
+            'from '
+            'stock_stock ss '
+            'left join transaction_transaction tt on '
+            'ss.id = tt.stock_id '
+            'group by '
+            'ss.symbol, ss.id ) st on '
+            '(st.id = snt.id) '
             'order by '
-                'st.symbol'
+            'st.symbol'
         )
 
         return StockCalculatedDetailSerializer(stock_totals, many=True).data
@@ -94,7 +104,6 @@ def create_stock_performance_response(stock_totals, stock_index_data_list):
                                      item.get('symbol', {}) == symbol and item.get('currency', {}) == 'JMD'), None)
 
             if stock_index_data and "market_price" in stock_index_data and stock_total['total_shares'] > 0:
-
                 market_value = stock_cal.calculate_market_value(stock_index_data['market_price'],
                                                                 stock_total['total_shares'])
 
@@ -115,8 +124,10 @@ def create_stock_performance_response(stock_totals, stock_index_data_list):
                 stock_details.append(stock_detail)
 
         for stock_detail in stock_details:
-            stock_detail['stock_weight']['owned'] = stock_cal.calculate_stock_weight(stock_detail['transaction_info']['current_value'], total_current_value)
-            stock_detail['stock_weight']['market'] = stock_cal.calculate_stock_weight(stock_detail['market_position']['market_value'], total_market_value)
+            stock_detail['stock_weight']['owned'] = stock_cal.calculate_stock_weight(
+                stock_detail['transaction_info']['current_value'], total_current_value)
+            stock_detail['stock_weight']['market'] = stock_cal.calculate_stock_weight(
+                stock_detail['market_position']['market_value'], total_market_value)
 
         return stock_details
     except Exception as e:
@@ -124,8 +135,6 @@ def create_stock_performance_response(stock_totals, stock_index_data_list):
 
 
 def get_total_market_value(symbol, market_price, total_shares, total_market_values_dicts):
-
-
     stock_market_dict = {'symbol': symbol, 'market_price': stock_cal.calculate_market_value(market_price, total_shares)}
 
     total_market_values_dicts['stocks'].append(stock_market_dict)
@@ -159,3 +168,25 @@ def get_stocks_totals(investor_id, portfolio_id):
     }
 
     return stock_totals
+
+
+def get_stock_names_from_cache():
+    """
+    Returns list of stock instrument names and symbol. Eg [{'instrument_name': 'Best Stock', 'symbol': 'BestSk'}]
+    :return:
+    """
+    try:
+        return json.loads(r.get('stock_names'))
+    except Exception as get_stock_names_from_cache_error:
+        print(get_stock_names_from_cache_error)
+        return []
+
+
+def create_stock(stock):
+    try:
+        if jamstockex_api_service.is_stock_symbol_valid(stock['symbol']):
+            stock["created_date"] = datetime.today()
+            serializer = StockSerializer(data=stock)
+            return helper.save_serializer(serializer)
+    except Exception as create_stock_error:
+        print(create_stock_error)
