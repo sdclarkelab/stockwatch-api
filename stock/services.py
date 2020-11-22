@@ -60,7 +60,7 @@ def get_stock_totals():
             'group by '
             'ss.symbol, ss.id '
             'having '
-            'ss.status_id = 1 ) snt '
+            'ss.status_id = 3 ) snt '
             'left join ( '
             'select '
             'ss.id as id, ss.symbol, sum(tt.shares) as total_shares '

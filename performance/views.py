@@ -12,11 +12,12 @@ from services import jamstockex_api_service
 def performance_list(request, investor_id, portfolio_id):
     try:
         if request.method == 'GET':
+            response = []
             stock_totals = stock_services.get_stock_totals()
 
-            stock_index_data_list = jamstockex_api_service.get_stocks_infos()
-
-            response = stock_services.create_stock_performance_response(stock_totals, stock_index_data_list)
+            if stock_totals:
+                stock_index_data_list = jamstockex_api_service.get_stocks_infos()
+                response = stock_services.create_stock_performance_response(stock_totals, stock_index_data_list)
 
             return Response(response)
     except Exception as e:
