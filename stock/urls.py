@@ -10,7 +10,7 @@ urlpatterns = [
     #  -------------------------------------
     #               TRANSACTION
     #  -------------------------------------
-    path('<str:symbol>/transaction/', include('transaction.urls')),
+    path('<str:symbol_id>/transaction/', include('transaction.urls')),
 
     # #  -------------------------------------
     # #               NOTIFICATION

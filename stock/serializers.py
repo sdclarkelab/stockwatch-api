@@ -13,6 +13,7 @@ class StockSerializer(serializers.ModelSerializer):
 
 class StockCalculatedDetailSerializer(serializers.ModelSerializer):
 
+    id = serializers.IntegerField()
     symbol = serializers.CharField(max_length=10)
     total_shares = serializers.DecimalField(decimal_places=2, max_digits=10, default=0.0, coerce_to_string=False)
     total_net_amount = serializers.DecimalField(decimal_places=2, max_digits=10, default=0.0, coerce_to_string=False)
@@ -21,4 +22,4 @@ class StockCalculatedDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = StockCalculatedDetail
-        fields = ('symbol', 'total_shares', 'avg_net_price', 'current_value', 'total_net_amount')
+        fields = ('id', 'symbol', 'total_shares', 'avg_net_price', 'current_value', 'total_net_amount')
