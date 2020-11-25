@@ -12,6 +12,7 @@ class Stock(models.Model):
     last_updated_date = models.DateTimeField(auto_now_add=True, null=True)
     created_date = models.DateTimeField(null=True)
     sold_date = models.DateTimeField(null=True)
+    isarchived = models.BooleanField(null=True)
 
 
 class StockCalculatedDetail(models.Model):

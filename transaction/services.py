@@ -13,9 +13,9 @@ def get_all_transactions(investor_id, portfolio_id):
     return transactions
 
 
-def get_transactions(investor_id, portfolio_id, symbol):
+def get_transactions(investor_id, portfolio_id, symbol_id):
     transactions = Transaction.objects.filter(stock__portfolio__user__id=investor_id,
-                                              stock__portfolio__id=portfolio_id, stock__symbol=symbol)
+                                              stock__portfolio__id=portfolio_id, stock__id=symbol_id)
     return transactions
 
 

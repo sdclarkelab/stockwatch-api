@@ -14,7 +14,7 @@ from .serializers import TransactionSerializer
 
 @api_view(['GET', 'POST', 'DELETE'])
 @protected_resource()
-def add_transaction(request, investor_id, portfolio_id, symbol):
+def add_transaction(request, investor_id, portfolio_id, symbol_id):
     """
     GET and POST to apply only transactions to existing stocks in a portfolio.
     :param portfolio_id:
@@ -25,7 +25,7 @@ def add_transaction(request, investor_id, portfolio_id, symbol):
     """
 
     if request.method == 'GET':
-        transactions = transaction_services.get_transactions(investor_id, portfolio_id, symbol)
+        transactions = transaction_services.get_transactions(investor_id, portfolio_id, symbol_id)
         return Response(TransactionSerializer(transactions, many=True).data, status=status.HTTP_200_OK)
 
     if request.method == 'POST':
@@ -35,14 +35,14 @@ def add_transaction(request, investor_id, portfolio_id, symbol):
 
         if body_data['shares'] >= 1:
             # TODO: Remove stock service call and pass the stock id from post body
-            stock = stock_services.get_stock_serializer(investor_id, portfolio_id, symbol)
+            stock = stock_services.get_stock_serializer(investor_id, portfolio_id, symbol_id)
 
             return transaction_services.create_transaction(body_data, stock.id)
         else:
             return Response({"detail": "Shares must be greater than 100."}, status=status.HTTP_400_BAD_REQUEST)
 
     elif request.method == 'DELETE':
-        transactions = transaction_services.delete_transactions(investor_id, portfolio_id, symbol)
+        transactions = transaction_services.delete_transactions(investor_id, portfolio_id, symbol_id)
         if transactions:
             return Response(CustomJsonResponse.return_successful_delete(), status=status.HTTP_200_OK)
         else:
