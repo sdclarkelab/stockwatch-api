@@ -187,6 +187,7 @@ def create_stock(stock):
     try:
         if jamstockex_api_service.is_stock_symbol_valid(stock['symbol']):
             stock["created_date"] = datetime.today()
+            stock["isarchived"] = False
             serializer = StockSerializer(data=stock)
             return helper.save_serializer(serializer)
     except Exception as create_stock_error:
