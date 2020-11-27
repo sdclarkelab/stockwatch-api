@@ -93,7 +93,7 @@ def upsert_transaction(investor_id, portfolio_id, stock_id, transaction_request)
         return {}
 
 
-def create_transaction(transaction, stock_id):
+def create_transaction(transaction):
     """
     Create a transaction for a stock.
     :param transaction:
@@ -102,9 +102,9 @@ def create_transaction(transaction, stock_id):
     """
 
     try:
-        transaction["stock"] = stock_id
         transaction.update(get_transaction_calculation_response(transaction))
         serializer = TransactionSerializer(data=transaction)
         return helper.save_serializer(serializer)
     except Exception as create_transaction_error:
         print(create_transaction_error)
+        raise create_transaction_error
