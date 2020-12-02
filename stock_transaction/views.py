@@ -7,6 +7,8 @@ import stock.services as stock_services
 import transaction.services as transaction_services
 from utils.custom_json_resp import CustomJsonResponse
 
+import stock_transaction.services as stock_transaction_services
+
 
 @api_view(['POST'])
 @protected_resource()
@@ -22,11 +24,7 @@ def create_stock_and_transaction(request, investor_id, portfolio_id):
         stock_payload = request.data['stock']
         transaction_payload = request.data['transaction']
 
-        # Create stock.
-        stock_obj = stock_services.create_stock(stock_payload)
-
-        # Add stock id to request body. ***DO NOT REMOVE***
-        return transaction_services.create_transaction(transaction_payload, stock_obj.data['id'])
+        return stock_transaction_services.create_stock_transaction(stock_payload, transaction_payload)
 
     except Exception as create_stock_and_transaction_error:
         print(create_stock_and_transaction_error)

@@ -13,9 +13,9 @@ def get_all_transactions(investor_id, portfolio_id):
     return transactions
 
 
-def get_transactions(investor_id, portfolio_id, symbol):
+def get_transactions(investor_id, portfolio_id, symbol_id):
     transactions = Transaction.objects.filter(stock__portfolio__user__id=investor_id,
-                                              stock__portfolio__id=portfolio_id, stock__symbol=symbol)
+                                              stock__portfolio__id=portfolio_id, stock__id=symbol_id)
     return transactions
 
 
@@ -93,7 +93,7 @@ def upsert_transaction(investor_id, portfolio_id, stock_id, transaction_request)
         return {}
 
 
-def create_transaction(transaction, stock_id):
+def create_transaction(transaction):
     """
     Create a transaction for a stock.
     :param transaction:
@@ -102,9 +102,9 @@ def create_transaction(transaction, stock_id):
     """
 
     try:
-        transaction["stock"] = stock_id
         transaction.update(get_transaction_calculation_response(transaction))
         serializer = TransactionSerializer(data=transaction)
         return helper.save_serializer(serializer)
     except Exception as create_transaction_error:
         print(create_transaction_error)
+        raise create_transaction_error

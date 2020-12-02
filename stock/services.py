@@ -56,7 +56,7 @@ def get_stock_totals():
             'left join transaction_transaction tt on '
             'ss.id = tt.stock_id '
             'where '
-            'tt."action" in (\'buy\') '
+            'tt."action" in (\'buy\')  and ss.isarchived in (\'0\') '
             'group by '
             'ss.symbol, ss.id '
             'having '
@@ -92,6 +92,7 @@ def create_stock_performance_response(stock_totals, stock_index_data_list):
             symbol = stock_total['symbol']
 
             stock_detail = {
+                'id': stock_total['id'],
                 'symbol': stock_total['symbol'],
                 'market_position': {},
                 'performance': {},
@@ -186,6 +187,7 @@ def create_stock(stock):
     try:
         if jamstockex_api_service.is_stock_symbol_valid(stock['symbol']):
             stock["created_date"] = datetime.today()
+            stock["isarchived"] = False
             serializer = StockSerializer(data=stock)
             return helper.save_serializer(serializer)
     except Exception as create_stock_error:
