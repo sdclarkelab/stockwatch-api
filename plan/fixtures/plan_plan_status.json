@@ -1,23 +1,23 @@
 [
   {
-    "model": "stock.StockStatus",
+    "model": "plan.PlanStatus",
     "pk": 1,
     "fields": {
       "status_name": "sell"
     }
   },
   {
-    "model": "stock.StockStatus",
+    "model": "plan.PlanStatus",
     "pk": 2,
     "fields": {
-      "status_name": "hold"
+      "status_name": "buy"
     }
   },
   {
-    "model": "stock.StockStatus",
+    "model": "plan.PlanStatus",
     "pk": 3,
     "fields": {
-      "status_name": "buy"
+      "status_name": "hold"
     }
   }
 ]

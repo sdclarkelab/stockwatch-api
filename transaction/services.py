@@ -106,5 +106,4 @@ def create_transaction(transaction):
         serializer = TransactionSerializer(data=transaction)
         return helper.save_serializer(serializer)
     except Exception as create_transaction_error:
-        print(create_transaction_error)
         raise create_transaction_error
