@@ -1,8 +1,9 @@
-import requests as req
 import json
-import redis
-from django.conf import settings
 from datetime import datetime
+
+import redis
+import requests as req
+from django.conf import settings
 
 try:
     # TODO: Use environment variable for redis properties.
@@ -79,7 +80,8 @@ def get_stocks_infos():
 
         stock_info, cached_last_updated_date = _get_cached_jamstockex_stocks_and_last_updated_date()
 
-        if cached_last_updated_date == datetime.today().strftime('%Y-%m-%d'):
+        if (not (stock_info or cached_last_updated_date)) or cached_last_updated_date == datetime.today().strftime(
+                '%Y-%m-%d'):
             jse_stocks = get_jamstockex_stocks()
 
             if jse_stocks:

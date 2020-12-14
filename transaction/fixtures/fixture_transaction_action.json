@@ -1,0 +1,16 @@
+[
+  {
+    "model": "transaction.TransactionAction",
+    "pk": 1,
+    "fields": {
+      "action": "sell"
+    }
+  },
+  {
+    "model": "transaction.TransactionAction",
+    "pk": 2,
+    "fields": {
+      "action": "buy"
+    }
+  }
+]
