@@ -1,5 +1,3 @@
-from datetime import datetime
-
 import redis
 from django.shortcuts import get_object_or_404
 
@@ -185,8 +183,6 @@ def get_stock_names_from_cache():
 def create_stock(stock):
     try:
         if jamstockex_api_service.is_stock_symbol_valid(stock['symbol']):
-            stock["created_date"] = datetime.today()
-            stock["is_archived"] = False
             serializer = StockSerializer(data=stock)
             return helper.save_serializer(serializer)
     except Exception as create_stock_error:

@@ -4,11 +4,10 @@ from django.db import models
 class Stock(models.Model):
     portfolio = models.ForeignKey('portfolio.Portfolio', on_delete=models.CASCADE, related_name='portfolio_stock')
     symbol = models.TextField(max_length=10)
-    name = models.TextField(max_length=100)
     is_archived = models.BooleanField(default=False)
     archived_date = models.DateTimeField(null=True)
-    created_date = models.DateTimeField(null=True)
-    last_updated_date = models.DateTimeField(auto_now_add=True, null=True)
+    created_date = models.DateTimeField(auto_now_add=True)
+    last_updated_date = models.DateTimeField(auto_now=True)
 
 
 class StockCalculatedDetail(models.Model):

@@ -97,7 +97,6 @@ def create_transaction(transaction):
     """
     Create a transaction for a stock.
     :param transaction:
-    :param stock_id:
     :return:
     """
 
