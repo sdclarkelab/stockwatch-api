@@ -1,18 +1,20 @@
 from django.db import models
 
 
-class StockStatus(models.Model):
-    status_name = models.TextField(max_length=20)
-
-
 class Stock(models.Model):
     portfolio = models.ForeignKey('portfolio.Portfolio', on_delete=models.CASCADE, related_name='portfolio_stock')
     symbol = models.TextField(max_length=10)
-    status = models.ForeignKey(StockStatus, on_delete=models.CASCADE, related_name='stock_status', null=True)
-    last_updated_date = models.DateTimeField(auto_now_add=True, null=True)
+    name = models.TextField(max_length=100)
+    mongo_db_id = models.CharField(max_length=50)
     created_date = models.DateTimeField(null=True)
-    sold_date = models.DateTimeField(null=True)
-    isarchived = models.BooleanField(null=True)
+    last_updated_date = models.DateTimeField(auto_now_add=True, null=True)
+
+
+class StockInfo(models.Model):
+    stock = models.ForeignKey('stock.Stock', on_delete=models.CASCADE, related_name='stock_stock_info')
+    created_date = models.DateTimeField(null=True)
+    last_updated_date = models.DateTimeField(auto_now_add=True, null=True)
+    is_archived = models.BooleanField(default=False)
 
 
 class StockCalculatedDetail(models.Model):

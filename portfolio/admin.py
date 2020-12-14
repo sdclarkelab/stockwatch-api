@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Portfolio, StockStatus
+from .models import Portfolio, PortfolioStatus
 
 
 class MyPortfolio(admin.ModelAdmin):
@@ -12,4 +12,4 @@ class MyStockStatus(admin.ModelAdmin):
 
 
 admin.site.register(Portfolio, MyPortfolio)
-admin.site.register(StockStatus, MyStockStatus)
+admin.site.register(PortfolioStatus, MyStockStatus)
