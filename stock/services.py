@@ -1,4 +1,3 @@
-import json
 from datetime import datetime
 
 import redis
@@ -177,7 +176,7 @@ def get_stock_names_from_cache():
     :return:
     """
     try:
-        return json.loads(r.get('stock_names'))
+        return jamstockex_api_service.get_stocks_infos()
     except Exception as get_stock_names_from_cache_error:
         print(get_stock_names_from_cache_error)
         return []
