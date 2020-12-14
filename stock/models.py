@@ -4,9 +4,17 @@ from django.db import models
 class Stock(models.Model):
     portfolio = models.ForeignKey('portfolio.Portfolio', on_delete=models.CASCADE, related_name='portfolio_stock')
     symbol = models.TextField(max_length=10)
+    name = models.TextField(max_length=100)
+    mongo_db_id = models.CharField(max_length=50)
+    created_date = models.DateTimeField(null=True)
+    last_updated_date = models.DateTimeField(auto_now_add=True, null=True)
+
+
+class StockInfo(models.Model):
+    stock = models.ForeignKey('stock.Stock', on_delete=models.CASCADE, related_name='stock_stock_info')
+    created_date = models.DateTimeField(null=True)
     last_updated_date = models.DateTimeField(auto_now_add=True, null=True)
     is_archived = models.BooleanField(default=False)
-    created_date = models.DateTimeField(null=True)
 
 
 class StockCalculatedDetail(models.Model):

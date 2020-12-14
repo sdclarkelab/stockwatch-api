@@ -1,13 +1,14 @@
 from django.db import models
 
 
+class TransactionAction(models.Model):
+    action = models.TextField(max_length=20)
+
+
 class Transaction(models.Model):
-    TRANSACTION_ACTIONS = (
-        ('buy', 'Buy'),
-        ('sell', 'Sell')
-    )
     stock = models.ForeignKey('stock.Stock', on_delete=models.CASCADE, related_name='stock_transaction')
-    action = models.CharField(max_length=4, choices=TRANSACTION_ACTIONS)
+    action = models.ForeignKey(TransactionAction, on_delete=models.CASCADE, related_name='transaction_action',
+                               null=True)
     price = models.DecimalField(decimal_places=2, max_digits=10, default=0.0)
     shares = models.IntegerField(default=0)
     fees = models.DecimalField(decimal_places=2, max_digits=10, default=0.0)
