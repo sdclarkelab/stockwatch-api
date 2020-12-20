@@ -17,8 +17,8 @@ except Exception as e:
 #  -------------------------------------
 #               Serializers
 #  -------------------------------------
-def get_stock_serializer(investor_id, portfolio_id, symbol):
-    stock = get_object_or_404(Stock, portfolio__user__id=investor_id, portfolio=portfolio_id, symbol=symbol)
+def get_stock_serializer(investor_id, portfolio_id, stock_id):
+    stock = get_object_or_404(Stock, portfolio__user__id=investor_id, portfolio=portfolio_id, id=stock_id)
     return stock
 
 
@@ -30,6 +30,11 @@ def get_stocks_serializers(investor_id, portfolio_id):
 def get_stocks(investor_id, portfolio_id):
     stocks = StockSerializer(get_stocks_serializers(investor_id, portfolio_id), many=True).data
     return stocks
+
+
+def get_stock(investor_id, portfolio_id, stock_id):
+    stock_serializer = StockSerializer(get_stock_serializer(investor_id, portfolio_id, stock_id)).data
+    return stock_serializer
 
 
 def get_stock_totals():
@@ -185,3 +190,26 @@ def create_stock(stock):
             return helper.save_serializer(serializer)
     except Exception as create_stock_error:
         print(create_stock_error)
+
+
+def update_is_archived(investor_id, portfolio_id, stock_id, is_archived, archived_date):
+    """
+
+    :param investor_id:
+    :param portfolio_id:
+    :param stock_id:
+    :param is_archived:
+    :param archived_date:
+    :return:
+    """
+    try:
+
+        data = {
+            "is_archived": is_archived,
+            "archived_date": archived_date,
+        }
+
+        stock = get_stock_serializer(investor_id, portfolio_id, stock_id)
+        return helper.update_serializer(StockSerializer(stock, data=data, partial=True))
+    except Exception as e:
+        print('Error in update_is_archived => ', e)

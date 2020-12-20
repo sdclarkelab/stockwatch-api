@@ -1,7 +1,10 @@
+from datetime import datetime
+
 from django.db.models import Sum, Avg, F, FloatField, ExpressionWrapper
 from django.shortcuts import get_object_or_404
 
 import helper
+import stock.services as stock_services
 import transaction.calculations as trans_cal
 from .models import Transaction
 from .serializers import TransactionInfoSerializers, TransactionInfoSerializer, TransactionSerializer
@@ -48,7 +51,10 @@ def get_transaction_calculation_response(transaction):
         'net_price': trans_cal.calculate_net_price(transaction)
     }
 
+    # Check if 'Sell' transaction
     if transaction['action'] == 1:
+        # if transaction['total_shares'] == transaction['shares']:
+        #     stock_services.update_is_archived(investor_id, portfolio_id, stock_id, True, datetime.now())
         transaction['shares'] = int(transaction['shares']) * -1
 
     return transaction_response
@@ -99,6 +105,27 @@ def upsert_transaction(investor_id, portfolio_id, stock_id, transaction_request)
     except Exception as e:
         print(e)
         return {}
+
+
+def create_transaction_and_update_stock(transaction, investor_id, portfolio_id, stock_id):
+    """
+
+    :param transaction:
+    :param investor_id:
+    :param portfolio_id:
+    :param stock_id:
+    :return:
+    """
+
+    try:
+        transaction_response = create_transaction(transaction)
+
+        if (transaction['total_shares'] * -1) == transaction['shares']:
+            stock_services.update_is_archived(investor_id, portfolio_id, stock_id, True, datetime.now())
+
+        return transaction_response
+    except Exception as create_transaction_and_update_stock_err:
+        raise create_transaction_and_update_stock_err
 
 
 def create_transaction(transaction):
