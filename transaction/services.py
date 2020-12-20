@@ -19,9 +19,9 @@ def get_transactions(investor_id, portfolio_id, symbol_id):
     return transactions
 
 
-def get_transaction(investor_id, portfolio_id, symbol, transaction_id):
+def get_transaction(investor_id, portfolio_id, stock_id, transaction_id):
     transaction = get_object_or_404(Transaction, stock__portfolio__user__id=investor_id,
-                                    stock__portfolio=portfolio_id, stock__symbol=symbol, pk=transaction_id)
+                                    stock__portfolio=portfolio_id, stock__id=stock_id, pk=transaction_id)
 
     return transaction
 
@@ -31,6 +31,14 @@ def delete_transactions(investor_id, portfolio_id, symbol):
                                               stock__portfolio__id=portfolio_id, stock__symbol=symbol).delete()
 
     return transactions
+
+
+def delete_transaction(investor_id, portfolio_id, stock_id, transaction_id):
+    try:
+        transaction = get_object_or_404(Transaction, stock__portfolio__user__id=investor_id,
+                                        stock__portfolio=portfolio_id, stock__id=stock_id, pk=transaction_id).delete()
+    except Exception as e:
+        print('Error in Delete Transaction => ', e)
 
 
 def get_transaction_calculation_response(transaction):
