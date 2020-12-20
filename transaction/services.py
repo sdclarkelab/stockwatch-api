@@ -48,7 +48,7 @@ def get_transaction_calculation_response(transaction):
         'net_price': trans_cal.calculate_net_price(transaction)
     }
 
-    if transaction['action'] == 'sell':
+    if transaction['action'] == 1:
         transaction['shares'] = int(transaction['shares']) * -1
 
     return transaction_response
