@@ -41,15 +41,24 @@ def add_transaction(request, investor_id, portfolio_id, stock_id):
 
 @api_view(['GET', 'PUT', 'DELETE'])
 @protected_resource()
-def transaction_detail(request, investor_id, portfolio_id, symbol, transaction_id):
-    transaction = transaction_services.get_transaction(investor_id, portfolio_id, symbol, transaction_id)
+def transaction_detail(request, investor_id, portfolio_id, stock_id, transaction_id):
+    """
 
+    :param request:
+    :param investor_id:
+    :param portfolio_id:
+    :param stock_id:
+    :param transaction_id:
+    :return:
+    """
     if request.method == 'GET':
+        transaction = transaction_services.get_transaction(investor_id, portfolio_id, stock_id, transaction_id)
         return Response(TransactionSerializer(transaction).data)
 
     elif request.method == 'PUT':
+        transaction = transaction_services.get_transaction(investor_id, portfolio_id, stock_id, transaction_id)
         return helper.update_serializer(TransactionSerializer(transaction, data=request.data, partial=True))
 
     elif request.method == 'DELETE':
-        transaction.delete()
+        transaction_services.delete_transaction(investor_id, portfolio_id, stock_id, transaction_id)
         return Response(CustomJsonResponse.return_successful_delete(), status=status.HTTP_200_OK)
