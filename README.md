@@ -1,6 +1,9 @@
 # StockWatchJa API
 This is the server for the StockWatchJa application. It pulls stock trade data from **[StockWatchJA: JamStockEx API](https://github.com/sdclarkelab/jamstockex-api)** at this [URL](http://jamstockexapi.stockwatchja.com/stocks).
 
+## API Documentation
+Click [here](https://documenter.getpostman.com/view/6678518/S1TU3eAz) to view the API documentation.
+
 ## Requirements
 Tool | Version  | Source |
 --- | --- | --- |
