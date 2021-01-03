@@ -1,4 +1,5 @@
-# stockwatch-api
+# StockWatchJa API
+This is the server for the StockWatchJa application. It pulls stock trade data from **[StockWatchJA: JamStockEx API](https://github.com/sdclarkelab/jamstockex-api)** at this [URL](http://jamstockexapi.stockwatchja.com/stocks).
 
 ## Requirements
 Tool | Version  | Source |
@@ -7,8 +8,6 @@ Python |3.7.4| [Python 3.7.4 Release](https://www.python.org/downloads/release/p
 Heroku|-|[Getting Started on Heroku with Python](https://devcenter.heroku.com/articles/ |getting-started-with-python)|
 Windows OS| 10 | - | 
 Docker| 19.03.4| [Docker Desktop](https://www.docker.com/products/docker-desktop)|
-
-
 
 ### Setup Dev
 
