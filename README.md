@@ -1,14 +1,16 @@
-# stockwatch-api
+# StockWatchJa API
+This is the server for the StockWatchJa application. It pulls stock trade data from **[StockWatchJA: JamStockEx API](https://github.com/sdclarkelab/jamstockex-api)** at this [URL](http://jamstockexapi.stockwatchja.com/stocks).
+
+## API Documentation
+Click [here](https://documenter.getpostman.com/view/6678518/S1TU3eAz) to view the API documentation.
 
 ## Requirements
 Tool | Version  | Source |
 --- | --- | --- |
 Python |3.7.4| [Python 3.7.4 Release](https://www.python.org/downloads/release/python-374/)|
-Heroku|-|[Getting Started on Heroku with Python](https://devcenter.heroku.com/articles/ |getting-started-with-python)|
+Heroku|-|[Getting Started on Heroku with Python](https://devcenter.heroku.com/articles/getting-started-with-python)|
 Windows OS| 10 | - | 
 Docker| 19.03.4| [Docker Desktop](https://www.docker.com/products/docker-desktop)|
-
-
 
 ### Setup Dev
 
@@ -67,9 +69,3 @@ Go to [application registration](http://127.0.0.1:5555/api/v1/stockwatch_admin/o
 > Client type: Confidential
 >
 > Authorization grant type: Resource owner password-based
-
-
-## Postman API collection
-
-Documented API can be found at
-[link](https://documenter.getpostman.com/view/6678518/S1TU3eAz)
