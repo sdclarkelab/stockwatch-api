@@ -69,9 +69,3 @@ Go to [application registration](http://127.0.0.1:5555/api/v1/stockwatch_admin/o
 > Client type: Confidential
 >
 > Authorization grant type: Resource owner password-based
-
-
-## Postman API collection
-
-Documented API can be found at
-[link](https://documenter.getpostman.com/view/6678518/S1TU3eAz)
