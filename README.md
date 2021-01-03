@@ -5,7 +5,7 @@ This is the server for the StockWatchJa application. It pulls stock trade data f
 Tool | Version  | Source |
 --- | --- | --- |
 Python |3.7.4| [Python 3.7.4 Release](https://www.python.org/downloads/release/python-374/)|
-Heroku|-|[Getting Started on Heroku with Python](https://devcenter.heroku.com/articles/ |getting-started-with-python)|
+Heroku|-|[Getting Started on Heroku with Python](https://devcenter.heroku.com/articles/getting-started-with-python)|
 Windows OS| 10 | - | 
 Docker| 19.03.4| [Docker Desktop](https://www.docker.com/products/docker-desktop)|
 
