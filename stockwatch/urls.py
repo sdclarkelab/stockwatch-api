@@ -41,7 +41,7 @@ class CustomTokenView(TokenView):
                 app_authorized.send(
                     sender=self, request=request,
                     token=token)
-                body['member'] = {
+                body['investor'] = {
                     'id': token.user.id,
                     'username': token.user.username
                 }
