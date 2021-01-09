@@ -1,7 +1,10 @@
+from datetime import datetime
+
 from django.db.models import Sum, Avg, F, FloatField, ExpressionWrapper
 from django.shortcuts import get_object_or_404
 
 import helper
+import stock.services as stock_services
 import transaction.calculations as trans_cal
 from .models import Transaction
 from .serializers import TransactionInfoSerializers, TransactionInfoSerializer, TransactionSerializer
@@ -19,9 +22,9 @@ def get_transactions(investor_id, portfolio_id, symbol_id):
     return transactions
 
 
-def get_transaction(investor_id, portfolio_id, symbol, transaction_id):
+def get_transaction(investor_id, portfolio_id, stock_id, transaction_id):
     transaction = get_object_or_404(Transaction, stock__portfolio__user__id=investor_id,
-                                    stock__portfolio=portfolio_id, stock__symbol=symbol, pk=transaction_id)
+                                    stock__portfolio=portfolio_id, stock__id=stock_id, pk=transaction_id)
 
     return transaction
 
@@ -33,6 +36,14 @@ def delete_transactions(investor_id, portfolio_id, symbol):
     return transactions
 
 
+def delete_transaction(investor_id, portfolio_id, stock_id, transaction_id):
+    try:
+        transaction = get_object_or_404(Transaction, stock__portfolio__user__id=investor_id,
+                                        stock__portfolio=portfolio_id, stock__id=stock_id, pk=transaction_id).delete()
+    except Exception as e:
+        print('Error in Delete Transaction => ', e)
+
+
 def get_transaction_calculation_response(transaction):
     transaction_response = {
         'gross_amount': trans_cal.calculate_gross_amount(transaction),
@@ -40,7 +51,10 @@ def get_transaction_calculation_response(transaction):
         'net_price': trans_cal.calculate_net_price(transaction)
     }
 
-    if transaction['action'] == 'sell':
+    # Check if 'Sell' transaction
+    if transaction['action'] == 1:
+        # if transaction['total_shares'] == transaction['shares']:
+        #     stock_services.update_is_archived(investor_id, portfolio_id, stock_id, True, datetime.now())
         transaction['shares'] = int(transaction['shares']) * -1
 
     return transaction_response
@@ -91,6 +105,27 @@ def upsert_transaction(investor_id, portfolio_id, stock_id, transaction_request)
     except Exception as e:
         print(e)
         return {}
+
+
+def create_transaction_and_update_stock(transaction, investor_id, portfolio_id, stock_id):
+    """
+
+    :param transaction:
+    :param investor_id:
+    :param portfolio_id:
+    :param stock_id:
+    :return:
+    """
+
+    try:
+        transaction_response = create_transaction(transaction)
+
+        if (transaction['total_shares'] * -1) == transaction['shares']:
+            stock_services.update_is_archived(investor_id, portfolio_id, stock_id, True, datetime.now())
+
+        return transaction_response
+    except Exception as create_transaction_and_update_stock_err:
+        raise create_transaction_and_update_stock_err
 
 
 def create_transaction(transaction):
