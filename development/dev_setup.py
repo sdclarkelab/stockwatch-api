@@ -4,7 +4,7 @@ import time
 
 def create_db():
     print('Creating services ...')
-    os.system('cd _docker_configs && docker-compose -p "stockwatch" up -d')
+    os.system('cd development/_docker_configs && docker-compose -p "stockwatch" up -d')
 
 
 def create_tables():
