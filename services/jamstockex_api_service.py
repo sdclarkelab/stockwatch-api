@@ -26,7 +26,7 @@ def is_stock_symbol_valid(symbol):
 
 
 def get_market_price(symbol):
-    response = req.get(settings.JAMSTOCK_API + symbol + '?projection=trade_info.market_price')
+    response = req.get(settings.JAMSTOCKEX_API + symbol + '?projection=trade_info.market_price')
     return response.json()['trade_info']['market_price']
 
 

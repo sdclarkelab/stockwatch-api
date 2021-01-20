@@ -15,36 +15,15 @@ Docker| 19.03.4| [Docker Desktop](https://www.docker.com/products/docker-desktop
 ### Setup Dev
 
 #### Create Django dev setting file
-Create dev_local_settings.py with the following content
-``` python
-import os
+Export settings module: 
+- On Windows: `set DJANGO_SETTINGS_MODULE=development.local_settings`
+- On Linux: `export DJANGO_SETTINGS_MODULE=development.local_settings`
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'e/s/~dso[r5_m9g7w2gkcqk%c4c-t^0f03sdls&6nkp^=e%31acj2m4+'
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = ['*']
-
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'stockwatch',
-        'USER': 'postgres',
-        'PASSWORD': 'password',
-        'HOST': 'localhost',
-        'PORT': 5432,
-    }
-}
-
-```
 
 #### Create and initialize Docker database 
 ``` shell script
 # Create Postgres database Docker container and create schema
-> python dev_setup.py
+> python development/dev_setup.py
 
 # Create admin user
 > python manage.py createsuperuser
@@ -57,7 +36,7 @@ DATABASES = {
 ```
 
 Login to [admin page](http://127.0.0.1:5555/api/v1/stockwatch_admin/) with super user credentials to confirm it works.
-(use "***[custom_admin_page](http://docker_ip_add/api/v1/stockwatch_adminn/)***" if the docker-machine ip is not using the default IP address)
+(use "***[custom_admin_page](http://docker_ip_add/api/v1/stockwatch_admin/)***" if the docker-machine ip is not using the default IP address)
 
 
 #### Register Application
