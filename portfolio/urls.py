@@ -8,6 +8,7 @@ urlpatterns = [
     #               PORTFOLIO
     #  -------------------------------------
     path('', views.portfolio_list, name='portfolio_list'),
+    path('default/', views.portfolio_default, name='portfolio_default'),
     path('<int:portfolio_id>/', views.portfolio_detail, name='portfolio_detail'),
 
     #  -------------------------------------
