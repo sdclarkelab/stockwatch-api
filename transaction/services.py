@@ -4,6 +4,7 @@ from django.db.models import Sum, Avg, F, FloatField, ExpressionWrapper
 from django.shortcuts import get_object_or_404
 
 import helper
+import plan.services as plan_services
 import stock.services as stock_services
 import transaction.calculations as trans_cal
 from .models import Transaction
@@ -122,6 +123,10 @@ def create_transaction_and_update_stock(transaction, investor_id, portfolio_id, 
 
         if (transaction['total_shares'] * -1) == transaction['shares']:
             stock_services.update_is_archived(investor_id, portfolio_id, stock_id, True, datetime.now())
+        else:
+            # update stock plan
+            stock_total = stock_services.get_stock_totals_by_id(stock_id)
+            plan_services.update_stock_plan(transaction['plan_id'], stock_total)
 
         return transaction_response
     except Exception as create_transaction_and_update_stock_err:

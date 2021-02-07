@@ -80,6 +80,16 @@ def get_stock_totals():
         print(e)
 
 
+def get_stock_totals_by_id(stock_id):
+    """
+
+    :param stock_id:
+    :return:
+    """
+    stock_totals = get_stock_totals()
+    return next(item for item in stock_totals if item["id"] == int(stock_id))
+
+
 def create_stock_performance_response(stock_totals, stock_index_data_list):
     try:
 
