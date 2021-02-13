@@ -59,3 +59,20 @@ def portfolio_detail(request, investor_id, portfolio_id):
     elif request.method == 'DELETE':
         portfolio.delete()
         return Response(CustomJsonResponse.return_successful_delete(), status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+@protected_resource()
+def portfolio_default(request, investor_id):
+    """
+
+    :param request:
+    :param investor_id:
+    :return:
+    """
+    if request.method == 'GET':
+        portfolio_id = portfolio_services.get_default_portfolio_id(investor_id)
+        response = {
+            "portfolio_id": portfolio_id
+        }
+        return Response(response, status=status.HTTP_200_OK)

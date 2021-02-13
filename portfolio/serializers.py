@@ -7,7 +7,7 @@ class PortfolioSerializer(serializers.ModelSerializer):
     #  TODO: Hide user value from get response
     class Meta:
         model = Portfolio
-        fields = ('id', 'name', 'status', 'user')
+        fields = ('id', 'name', 'status', 'user', 'is_default')
 
     def update(self, instance, validated_data):
         instance.status = validated_data.get('status', instance.status)

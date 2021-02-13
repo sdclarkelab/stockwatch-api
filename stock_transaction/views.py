@@ -3,11 +3,8 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-import stock.services as stock_services
-import transaction.services as transaction_services
-from utils.custom_json_resp import CustomJsonResponse
-
 import stock_transaction.services as stock_transaction_services
+from utils.custom_json_resp import CustomJsonResponse
 
 
 @api_view(['POST'])
@@ -23,8 +20,9 @@ def create_stock_and_transaction(request, investor_id, portfolio_id):
     try:
         stock_payload = request.data['stock']
         transaction_payload = request.data['transaction']
+        plan_payload = request.data['plan']
 
-        return stock_transaction_services.create_stock_transaction(stock_payload, transaction_payload)
+        return stock_transaction_services.create_stock_transaction(stock_payload, transaction_payload, plan_payload)
 
     except Exception as create_stock_and_transaction_error:
         print(create_stock_and_transaction_error)
