@@ -7,6 +7,7 @@ import helper
 import plan.services as plan_services
 import stock.services as stock_services
 import transaction.calculations as trans_cal
+from services import jamstockex_api_service
 from .models import Transaction
 from .serializers import TransactionInfoSerializers, TransactionInfoSerializer, TransactionSerializer
 
@@ -126,7 +127,10 @@ def create_transaction_and_update_stock(transaction, investor_id, portfolio_id, 
         else:
             # update stock plan
             stock_total = stock_services.get_stock_totals_by_id(stock_id)
-            plan_services.update_stock_plan(transaction['plan_id'], stock_total)
+
+            stock_obj = stock_services.get_stock(investor_id, portfolio_id, stock_id)
+            market_price = jamstockex_api_service.get_market_price(stock_obj.data['symbol'])
+            plan_services.update_stock_plan(transaction['plan_id'], stock_total, market_price)
 
         return transaction_response
     except Exception as create_transaction_and_update_stock_err:
