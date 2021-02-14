@@ -12,12 +12,19 @@ def get_plan(investor_id, portfolio_id, symbol, plan_id):
     return plan
 
 
+def get_plan_id_by_stock_id(stock_id):
+    plan = get_object_or_404(Plan, stock__id=stock_id)
+    plan_id = PlanSerializer(plan).data['id']
+
+    return plan_id
+
+
 def get_plan_by_id(plan_id):
     plan = get_object_or_404(Plan, pk=plan_id)
     return plan
 
 
-def get_pan_statuses():
+def get_plan_statuses():
     try:
         plan_statues = PlanStatus.objects.all()
         return PlanStatusSerializer(plan_statues, many=True).data
@@ -35,19 +42,15 @@ def create_plan_in_db(plan):
         raise e
 
 
-def create_stock_plan(plan, stock_total):
+def create_stock_plan(plan, stock_total, market_price):
     try:
 
         plan['stock'] = stock_total['id']
         plan['target_sell_price'] = calculate_target_sell_price(plan['target_percentage'], stock_total['avg_net_price'])
 
-        status = ''
-        if plan['target_sell_price'] > stock_total['avg_net_price']:
-            status = 'hold'
-        else:
-            status = 'sell'
+        status = check_plan_status(plan, market_price)
 
-        plan_statues = get_pan_statuses()
+        plan_statues = get_plan_statuses()
         plan_status = next(item for item in plan_statues if item["status_name"] == status)
 
         plan['status'] = plan_status['id']
@@ -74,11 +77,12 @@ def calculate_target_sell_price(target_percentage, avg_net_price):
         raise e
 
 
-def update_stock_plan(plan_id, stock_total):
+def update_stock_plan(plan_id, stock_total, market_price):
     """
 
     :param plan_id:
     :param stock_total:
+    :param market_price:
     :return:
     """
     try:
@@ -87,16 +91,32 @@ def update_stock_plan(plan_id, stock_total):
         updated_plan = PlanSerializer(plan).data
         updated_plan['target_sell_price'] = calculate_target_sell_price(10, stock_total['avg_net_price'])
 
-        if updated_plan['target_sell_price'] > stock_total['avg_net_price']:
-            status = 'hold'
-        else:
-            status = 'sell'
+        status = check_plan_status(updated_plan, market_price)
 
-        plan_statues = get_pan_statuses()
+        plan_statues = get_plan_statuses()
         plan_status = next(item for item in plan_statues if item["status_name"] == status)
+        updated_plan['status'] = plan_status['id']
 
         return helper.update_serializer(PlanSerializer(plan, data=updated_plan, partial=True))
 
+    except Exception as e:
+        print(e)
+        raise e
+
+
+def check_plan_status(plan, market_price):
+    """
+
+    :param plan:
+    :param market_price:
+    :return:
+    """
+    status = 'hold'
+    try:
+        if market_price >= plan['target_sell_price']:
+            status = 'sell'
+
+        return status
     except Exception as e:
         print(e)
         raise e

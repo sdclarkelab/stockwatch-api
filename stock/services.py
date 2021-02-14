@@ -2,6 +2,7 @@ import redis
 from django.shortcuts import get_object_or_404
 
 import helper
+import plan.services as plan_service
 import stock.calculations as stock_cal
 from services import jamstockex_api_service
 from .models import Stock, StockCalculatedDetail
@@ -107,7 +108,8 @@ def create_stock_performance_response(stock_totals, stock_index_data_list):
                 'market_position': {},
                 'performance': {},
                 'transaction_info': {},
-                'stock_weight': {}
+                'stock_weight': {},
+                'plan': {}
             }
 
             # Get Market object
@@ -117,6 +119,11 @@ def create_stock_performance_response(stock_totals, stock_index_data_list):
             if stock_index_data and "market_price" in stock_index_data and stock_total['total_shares'] > 0:
                 market_value = stock_cal.calculate_market_value(stock_index_data['market_price'],
                                                                 stock_total['total_shares'])
+
+                # get plan id by stock id
+                plan_id = plan_service.get_plan_id_by_stock_id(stock_total['id'])
+                stock_detail['plan'] = plan_service.update_stock_plan(plan_id, stock_total,
+                                                                      stock_index_data['market_price']).data
 
                 total_market_value += market_value
                 total_current_value += stock_total['current_value']
