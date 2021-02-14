@@ -8,7 +8,7 @@ def calculate_gross_amount(transaction):
 
 @round_to_2_sig
 def calculate_net_amount(transaction):
-    if transaction['action'] == 'buy':
+    if transaction['action'] == 2:
         return calculate_gross_amount(transaction) + float(transaction['fees'])
     return calculate_gross_amount(transaction) - float(transaction['fees'])
 
