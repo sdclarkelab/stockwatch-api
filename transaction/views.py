@@ -3,7 +3,6 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-import helper
 import transaction.services as transaction_services
 from utils.custom_json_resp import CustomJsonResponse
 from .serializers import TransactionSerializer
@@ -54,8 +53,8 @@ def transaction_detail(request, investor_id, portfolio_id, stock_id, transaction
         return Response(TransactionSerializer(transaction).data)
 
     elif request.method == 'PUT':
-        transaction = transaction_services.get_transaction(investor_id, portfolio_id, stock_id, transaction_id)
-        return helper.update_serializer(TransactionSerializer(transaction, data=request.data, partial=True))
+        return transaction_services.update_transaction(investor_id, portfolio_id, stock_id, transaction_id,
+                                                       request.data)
 
     elif request.method == 'DELETE':
         transaction_services.delete_transaction(investor_id, portfolio_id, stock_id, transaction_id)
