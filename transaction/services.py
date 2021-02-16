@@ -137,6 +137,23 @@ def create_transaction_and_update_stock(transaction, investor_id, portfolio_id, 
         raise create_transaction_and_update_stock_err
 
 
+def update_transaction(investor_id, portfolio_id, stock_id, transaction_id, transaction_req_data):
+    transaction_req_data.update(get_transaction_calculation_response(transaction_req_data))
+    transaction_orm_obj = get_transaction(investor_id, portfolio_id, stock_id, transaction_id)
+    transaction = helper.update_serializer(
+        TransactionSerializer(transaction_orm_obj, data=transaction_req_data, partial=True))
+
+    plan_id = plan_services.get_plan_id_by_stock_id(stock_id)
+    # update stock plan
+    stock_total = stock_services.get_stock_totals_by_id(stock_id)
+
+    stock_obj = stock_services.get_stock(investor_id, portfolio_id, stock_id)
+    market_price = jamstockex_api_service.get_market_price(stock_obj['symbol'])
+    plan_services.update_stock_plan(plan_id, stock_total, market_price)
+
+    return transaction
+
+
 def create_transaction(transaction):
     """
     Create a transaction for a stock.
