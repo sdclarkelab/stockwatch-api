@@ -17,7 +17,6 @@ def get_all_transactions(investor_id, portfolio_id):
                                               stock__portfolio__id=portfolio_id)
     return transactions
 
-
 def get_transactions(investor_id, portfolio_id, symbol_id):
     transactions = Transaction.objects.filter(stock__portfolio__user__id=investor_id,
                                               stock__portfolio__id=portfolio_id, stock__id=symbol_id)
@@ -129,6 +128,7 @@ def create_transaction_and_update_stock(transaction, investor_id, portfolio_id, 
             stock_total = stock_services.get_stock_totals_by_id(stock_id)
 
             stock_obj = stock_services.get_stock(investor_id, portfolio_id, stock_id)
+            # TODO: pull from cache
             market_price = jamstockex_api_service.get_market_price(stock_obj['symbol'])
             plan_services.update_stock_plan(transaction['plan_id'], stock_total, market_price)
 
