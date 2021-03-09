@@ -38,6 +38,17 @@ def get_stock(investor_id, portfolio_id, stock_id):
     return stock_serializer
 
 
+def get_stock_by_symbol(investor_id, portfolio_id, symbol, archived):
+    try:
+        stock = Stock.objects.get(portfolio__user__id=investor_id, portfolio=portfolio_id, symbol=symbol,
+                                  is_archived=archived)
+        stock_serializer = StockSerializer(stock).data
+        return stock_serializer
+
+    except Exception as ex:
+        return None
+
+
 def get_stock_totals():
     try:
 
