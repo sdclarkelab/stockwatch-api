@@ -26,8 +26,10 @@ def is_stock_symbol_valid(symbol):
 
 
 def get_market_price(symbol):
-    response = req.get(f'{settings.JAMSTOCKEX_API}/stocks/{symbol}?projection=trade_info.market_price')
-    return response.json()['trade_info']['market_price']
+    stocks = get_stocks_infos()
+    stock = next((stock for stock in stocks if stock['symbol'] == symbol), None)
+
+    return stock['trade_info']['market_price']
 
 
 def _get_cached_jamstockex_stocks_and_last_updated_date():
@@ -80,8 +82,7 @@ def get_stocks_infos():
 
         stock_info, cached_last_updated_date = _get_cached_jamstockex_stocks_and_last_updated_date()
 
-        if (not (stock_info or cached_last_updated_date)) or cached_last_updated_date == datetime.today().strftime(
-                '%Y-%m-%d'):
+        if cached_last_updated_date != datetime.today().strftime('%Y-%m-%d'):
             jse_stocks = get_jamstockex_stocks()
 
             if jse_stocks:
