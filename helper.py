@@ -16,9 +16,9 @@ def update_serializer(serializer):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-def round_to_2_sig(func):
+def round_to_10_sig(func):
     def wrapper(*args, **kwargs):
         val = func(*args, **kwargs)
-        return round(val, 2)
+        return round(val, 10)
 
     return wrapper

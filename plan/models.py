@@ -7,5 +7,5 @@ class PlanStatus(models.Model):
 
 class Plan(models.Model):
     stock = models.OneToOneField('stock.Stock', on_delete=models.CASCADE, related_name='stock_plan')
-    target_sell_price = models.DecimalField(decimal_places=2, max_digits=10)
+    target_sell_price = models.DecimalField(decimal_places=10, max_digits=30)
     status = models.ForeignKey(PlanStatus, on_delete=models.CASCADE, related_name='plan_status', null=True)
