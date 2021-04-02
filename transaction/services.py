@@ -128,7 +128,6 @@ def create_transaction_and_update_stock(transaction, investor_id, portfolio_id, 
             stock_total = stock_services.get_stock_totals_by_id(stock_id)
 
             stock_obj = stock_services.get_stock(investor_id, portfolio_id, stock_id)
-            # TODO: pull from cache
             market_price = jamstockex_api_service.get_market_price(stock_obj['symbol'])
             plan_services.update_stock_plan(transaction['plan_id'], stock_total, market_price)
 
