@@ -15,7 +15,7 @@ except Exception as e:
 def is_stock_symbol_valid(symbol):
     is_valid = False
 
-    stock_names = json.loads(r.get('stock_names'))
+    stock_names = get_jamstockex_api_stock_names()
 
     symbols = [stock_name['symbol'] for stock_name in stock_names]
 
@@ -88,6 +88,17 @@ def get_stocks_infos():
             if jse_stocks:
                 stock_info = jse_stocks
 
+        _set_jamstockex_api_stock_names(stock_info)
+
+        return stock_info
+    except Exception as e:
+        print(e)
+        return {}
+
+
+def _set_jamstockex_api_stock_names(stock_info):
+    try:
+        # list comprehension to create stock names list
         stock_names = [
             {
                 'instrument_name': stocks_obj['instrument_name'],
@@ -99,11 +110,24 @@ def get_stocks_infos():
         sorted_stock_names = sorted(stock_names, key=lambda k: k['instrument_name'])
         r.set('stock_names', json.dumps(sorted_stock_names))
 
-        return stock_info
     except Exception as e:
         print(e)
-        print('Something went wrong')
-        return {}
+
+
+def get_jamstockex_api_stock_names():
+    try:
+        stock_names = json.loads(r.get('stock_names'))
+        if not stock_names:
+            stock_info, cached_last_updated_date = _get_cached_jamstockex_stocks_and_last_updated_date()
+            _set_jamstockex_api_stock_names(stock_info)
+
+            stock_names = json.loads(r.get('stock_names'))
+
+        return stock_names
+
+    except Exception as e:
+        print(e)
+        return []
 
 
 def get_stock_trade_info(symbol):
