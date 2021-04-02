@@ -64,7 +64,7 @@ def get_stock_totals():
             '( '
             'select '
             'ss.id as id, ss.symbol, sum(tt.net_amount) as total_net_amount, cast((sum(tt.net_amount)/ '
-            'nullif(sum(tt.shares), 0)) as DECIMAL(10, 2)) as avg_net_price '
+            'nullif(sum(tt.shares), 0)) as DECIMAL(30, 15)) as avg_net_price '
             'from '
             'stock_stock ss '
             'left join transaction_transaction tt on '
@@ -205,7 +205,7 @@ def get_stock_names_from_cache():
     :return:
     """
     try:
-        return jamstockex_api_service.get_stocks_infos()
+        return jamstockex_api_service.get_jamstockex_api_stock_names()
     except Exception as get_stock_names_from_cache_error:
         print(get_stock_names_from_cache_error)
         return []
